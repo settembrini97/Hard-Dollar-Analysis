@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retorno total · bonos hard dollar</title>
+<style>
+:root{
+  color-scheme: light;
+  --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s1-strong:#184f95; --c2:#eb6834; --c3:#1baf7a; --neg:#e34948; --mid:#f0efec; --pos-text:#006300;
+  --hm-pos:#2a78d6; --hm-neg:#e34948;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s1-strong:#86b6ef; --c2:#d95926; --c3:#199e70; --neg:#e66767; --mid:#383835; --pos-text:#0ca30c;
+    --hm-pos:#3987e5; --hm-neg:#e66767;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1560px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:22px;margin:0 0 4px;font-weight:650}
+h2{font-size:15px;margin:0 0 2px;font-weight:650}
+.sub{color:var(--ink2);margin:0 0 18px}
+.hint{color:var(--muted);font-size:12px;margin:0 0 10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.controls{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink2)}
+.f input[type=number],.f input[type=date]{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--axis);border-radius:8px;padding:6px 8px;width:128px}
+.f input:focus-visible,table input:focus-visible,button:focus-visible{outline:2px solid var(--s1);outline-offset:1px}
+.f.narrow input{width:92px}
+.chk{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink);padding-bottom:7px}
+.presets{display:flex;gap:6px;padding-bottom:1px}
+button{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--axis);border-radius:8px;padding:6px 10px;cursor:pointer}
+button:hover{background:var(--mid)}
+button[aria-pressed=true]{border-color:var(--s1);color:var(--s1-strong);font-weight:600}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;white-space:nowrap}
+th,td{padding:7px 6px;text-align:right;border-bottom:1px solid var(--grid)}
+td:first-child,th:first-child{position:sticky;left:0;background:var(--surface);z-index:1}
+tbody tr:hover td:first-child,tbody tr.sel td:first-child{background:var(--mid)}
+tr.gh th:first-child{position:static}
+th{font-size:12px;font-weight:600;color:var(--ink2);background:var(--surface)}
+tr.gh th{text-align:center;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--axis);padding-bottom:4px}
+[hidden]{display:none!important}
+.sc2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+@media (max-width:900px){.sc2{grid-template-columns:1fr}}
+.sbox{border:1px solid var(--grid);border-radius:10px;padding:12px 14px}
+.sbox h3{font-size:13px;margin:0 0 6px;font-weight:650}
+.sbox.sA{border-top:3px solid var(--a)}.sbox.sB{border-top:3px solid var(--b)}
+/* ---- color coding: A = verde, B = naranja, esperado = gris; signo del retorno = azul (+) / rojo (−) */
+:root{--a:var(--c3); --b:var(--c2)}
+.gA{box-shadow:inset 0 -3px 0 var(--a)} .gB{box-shadow:inset 0 -3px 0 var(--b)} .gE{box-shadow:inset 0 -3px 0 var(--ink2)}
+tr.gh th.gA,tr.gh th.gB,tr.gh th.gE{color:var(--ink)}
+.posv{color:var(--s1-strong);font-weight:600}.neg{font-weight:600}
+#tbl tbody tr:not(.grp) > :nth-child(n+6):nth-child(-n+9){background:color-mix(in srgb,var(--a) 8%,transparent)}
+#tbl tbody tr:not(.grp) > :nth-child(n+10):nth-child(-n+13){background:color-mix(in srgb,var(--b) 8%,transparent)}
+#tbl tbody tr:not(.grp) > :nth-child(n+14):nth-child(-n+16){background:color-mix(in srgb,var(--ink2) 7%,transparent)}
+#tbl tbody tr:not(.grp) > :nth-child(n+26){background:color-mix(in srgb,var(--ink2) 4%,transparent)}
+#tbl thead tr:not(.gh) > :nth-child(n+6):nth-child(-n+9),#tbl thead tr:not(.gh) > :nth-child(23){box-shadow:inset 0 3px 0 var(--a)}
+#tbl thead tr:not(.gh) > :nth-child(n+10):nth-child(-n+13),#tbl thead tr:not(.gh) > :nth-child(24){box-shadow:inset 0 3px 0 var(--b)}
+#tbl thead tr:not(.gh) > :nth-child(n+14):nth-child(-n+16){box-shadow:inset 0 3px 0 var(--ink2)}
+#tbl tbody tr.sel td{box-shadow:inset 0 1px 0 var(--s1),inset 0 -1px 0 var(--s1)}
+#tbl tbody tr:hover:not(.sel):not(.grp) td{box-shadow:inset 0 1px 0 var(--axis),inset 0 -1px 0 var(--axis)}
+#itbl thead th:nth-child(3){box-shadow:inset 0 3px 0 var(--a)}
+#itbl thead th:nth-child(4){box-shadow:inset 0 3px 0 var(--b)}
+.pb2{display:flex;gap:2px;height:12px;margin:2px 0 8px}.pb2 span{display:block;height:12px;transition:width .15s}
+.pb2 #pbA{background:var(--a);border-radius:6px 0 0 6px}.pb2 #pbB{background:var(--b);border-radius:0 6px 6px 0}
+.scen .sl-top > span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.scen .sl-top > span:first-child::before{background:var(--a)}.scen .sl-top > span:last-child::before{background:var(--b)}
+.kv.kA{border-top:3px solid var(--a)}.kv.kB{border-top:3px solid var(--b)}.kv.kE{border-top:3px solid var(--s1)}
+.dt th.gA{box-shadow:inset 0 3px 0 var(--a)}.dt th.gB{box-shadow:inset 0 3px 0 var(--b)}
+#dFlows tbody td:nth-child(n+7):nth-child(-n+12),#dFlows tbody td:nth-child(19),#dFlows tbody td:nth-child(20){background:color-mix(in srgb,var(--a) 7%,transparent)}
+#dFlows tbody td:nth-child(n+13):nth-child(-n+18),#dFlows tbody td:nth-child(21),#dFlows tbody td:nth-child(22){background:color-mix(in srgb,var(--b) 7%,transparent)}
+#dFlows tbody tr.dim td:nth-child(n){background:transparent}
+#dFlows tbody tr.ph-collected td:first-child{box-shadow:inset 3px 0 0 var(--s1)}
+#dFlows tbody tr.ph-exit td:first-child{box-shadow:inset 3px 0 0 var(--ink2)}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.badge.collected{background:color-mix(in srgb,var(--s1) 18%,transparent);color:var(--s1-strong)}
+.badge.exit{background:color-mix(in srgb,var(--ink2) 15%,transparent);color:var(--ink2)}
+.badge.seller{background:transparent;border:1px solid var(--grid);color:var(--muted)}
+#dComp thead th:nth-child(2){box-shadow:inset 0 3px 0 var(--a)}#dComp thead th:nth-child(3){box-shadow:inset 0 3px 0 var(--b)}#dComp thead th:nth-child(4){box-shadow:inset 0 3px 0 var(--ink2)}
+#dComp tbody td:nth-child(2),#dComp tfoot td:nth-child(2){background:color-mix(in srgb,var(--a) 7%,transparent)}
+#dComp tbody td:nth-child(3),#dComp tfoot td:nth-child(3){background:color-mix(in srgb,var(--b) 7%,transparent)}
+#dComp tbody td:nth-child(4),#dComp tfoot td:nth-child(4){background:color-mix(in srgb,var(--ink2) 7%,transparent)}
+#detail{border-color:var(--s1)}
+#detail .dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
+.kvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:10px 0 16px}
+.kv{border:1px solid var(--grid);border-radius:10px;padding:10px 12px}
+.kv h3{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600}
+.kv div{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:2px 0;font-variant-numeric:tabular-nums}
+.kv div span:first-child{color:var(--ink2)}
+.dt tbody tr{cursor:default}.dt tbody tr:hover{background:transparent}.dt tbody tr:hover td:first-child{background:var(--surface)}
+.dt tr.gh th{border-left:1px solid var(--grid)}.dt tr.gh th:first-child{border-left:0}
+.dt tr.dim td{color:var(--muted)}
+.dt tfoot td{font-weight:650;border-top:1px solid var(--axis)}
+.dt td.sep,.dt th.sep{border-left:1px solid var(--grid)}
+.dt td.ph,.dt th.ph{text-align:left}
+h3.dsec{font-size:13px;margin:14px 0 4px;font-weight:650}
+#tbl tr:not(.gh):not(.grp) > :nth-child(6), #tbl tr:not(.gh):not(.grp) > :nth-child(10), #tbl tr:not(.gh):not(.grp) > :nth-child(14), #tbl tr:not(.gh):not(.grp) > :nth-child(17), #tbl tr:not(.gh):not(.grp) > :nth-child(26){border-left:1px solid var(--grid)}
+#tbl tr.gh > th + th{border-left:1px solid var(--grid)}
+#tbl tr.gh > :nth-child(1){border-left:0}
+th:first-child,td:first-child{text-align:left}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--mid)}
+tbody tr.sel{background:var(--mid);box-shadow:inset 3px 0 0 var(--s1)}
+td.tk{font-weight:600}
+td input.sh{width:62px}
+td input:disabled{opacity:.45}
+td input{width:70px;font:inherit;color:var(--ink);background:transparent;border:1px solid var(--axis);border-radius:6px;padding:3px 6px;text-align:right}
+td input::placeholder{color:var(--muted)}
+.grp td{text-align:left;font-size:12px;font-weight:650;color:var(--ink2);background:var(--page);padding-top:12px;border-bottom:1px solid var(--axis)}
+tbody tr.grp{cursor:default}tbody tr.grp:hover{background:var(--page)}
+.neg{color:var(--neg)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin:6px 0 4px;flex-wrap:wrap}
+.scen .sl-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink2);margin-bottom:4px}
+.scen .sl-top b{font-size:17px;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--s1);margin:2px 0 14px}
+.legend i.dot{border-radius:50%}
+.pbwrap{min-width:220px}.plab{display:flex;gap:2px;height:16px;font-size:12px;font-weight:600;color:var(--ink2);font-variant-numeric:tabular-nums}
+.plab span{display:block;white-space:nowrap;min-width:0}.plab span:last-child{display:flex;justify-content:flex-end}.plab .neg{color:var(--neg)}
+.pbar{display:flex;gap:2px;min-width:200px;height:10px}
+.pbar span{display:block;height:10px;min-width:0}
+.pbar span:first-child{border-radius:5px 0 0 5px}.pbar span:last-child{border-radius:0 5px 5px 0}
+#itbl th:last-child,#itbl td:last-child{text-align:left}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+svg text{fill:var(--ink2);font:11px system-ui,-apple-system,"Segoe UI",sans-serif}
+svg .lbl{fill:var(--ink);font-weight:600}
+svg .muted{fill:var(--muted)}
+.chart{width:100%}
+#tip{position:fixed;pointer-events:none;z-index:10;background:var(--surface);color:var(--ink);border:1px solid var(--axis);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.14);display:none;max-width:260px}
+#tip b{font-size:13px}
+#tip .row{display:flex;justify-content:space-between;gap:14px;color:var(--ink2)}
+#tip .row span:last-child{color:var(--ink);font-weight:600}
+.notes{font-size:12.5px;color:var(--ink2)}
+.notes li{margin:3px 0}
+.warn{color:var(--ink2);font-size:12px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Retorno total · bonos hard dollar</h1>
+  <p class="sub">Comprás en t+1 y vendés en la exit date a un precio que es el promedio, ponderado por probabilidad, de dos escenarios: A (performing, con tu exit yield) y B (reestructuración). Cobrás y reinvertís los flujos y, opcionalmente, descontás el fondeo. Todo en USD cada 100 VN original. Precios de entrada iniciales: los que cargaste para el settle del 5/nov (sucios, editables).</p>
+
+  <section class="card">
+    <div class="controls">
+      <label class="f">Entrada t+1 (settlement)<input type="date" id="entry"></label>
+      <label class="f narrow">Exit: t+x (días corridos)<input type="number" id="x" min="1" step="1"></label>
+      <label class="f">Exit date<input type="date" id="exit"></label>
+      <div class="presets" id="presets" aria-label="Atajos de x"></div>
+      <label class="f narrow">Tasa libre de riesgo (TEA %)<input type="number" id="rf" step="0.05"></label>
+      <label class="chk"><input type="checkbox" id="fundOn"> Incluir fondeo</label>
+      <label class="chk"><input type="checkbox" id="fundSame"> Misma tasa</label>
+      <label class="f narrow">Tasa de fondeo (TEA %)<input type="number" id="fundRate" step="0.05"></label>
+      <button id="resetPx" type="button">Restablecer precios y yields</button>
+    </div>
+    <p class="hint" style="margin-top:12px">Los supuestos de los escenarios A y B están en la sección de abajo. Tasas en TEA act/365 (misma convención del motor). Los flujos incluyen cupón y amortización.</p>
+  </section>
+
+  <section class="card scen">
+    <h2>Supuestos de los escenarios: A performing y B</h2>
+    <p class="hint">Precio de salida y retorno = (1 − p) × escenario A + p × escenario B. Acá están juntos todos los supuestos de los dos escenarios; los shifts también se pueden fijar bono por bono en la tabla.</p>
+    <div class="sl-top"><span>A · performing <b id="pAv">100%</b></span><span>B · <span class="bname">reestructuración</span> <b id="pBv">0%</b></span></div>
+    <div class="pb2" aria-hidden="true"><span id="pbA"></span><span id="pbB"></span></div>
+    <input type="range" id="pB" min="0" max="100" step="1" aria-label="Probabilidad del escenario B">
+    <div class="sc2">
+      <div class="sbox sA">
+        <h3>A · performing</h3>
+        <p class="hint">Valúa los flujos originales a tu exit yield: cada bono sale a su TIR de entrada + el shift, salvo que escribas un Yield A propio en la tabla.</p>
+        <div class="controls">
+          <label class="f narrow">Shift exit yield A, por defecto (bps)<input type="number" id="shift" step="25"></label>
+          <label class="f narrow">Yield de descuento A (TEA %)<input type="number" id="yAd" step="0.5"></label>
+        </div>
+        <p class="hint" style="margin-top:8px">El yield de descuento A solo se usa en la probabilidad implícita (VPN de A a la fecha de entrada). Es un valor de ejemplo, igual para todos los bonos.</p>
+      </div>
+      <div class="sbox sB">
+        <h3>B · <span class="bname">reestructuración</span></h3>
+        <div class="controls" style="margin-bottom:8px">
+          <label class="f">Preset por bono<select id="bPreset"><option value="manual">Manual (valores por defecto)</option><option value="low">Severidad baja</option><option value="base">Severidad base</option><option value="high">Severidad alta</option></select></label>
+          <label class="f">Valuar B como<select id="bMode"><option value="restr">Reestructuración</option><option value="shift">Shift de yields</option><option value="parity">Paridad</option></select></label>
+        </div>
+        <div class="controls" id="pn-restr">
+          <label class="f">Fecha de reestructuración<input type="date" id="rDate"></label>
+          <label class="f narrow">Haircut (% de los flujos)<input type="number" id="hc" min="0" max="100" step="5"></label>
+          <label class="f narrow">Exit yield B (TEA %)<input type="number" id="yB" step="0.5"></label>
+          <span class="hint" id="bsum" style="padding-bottom:8px"></span>
+        </div>
+        <p class="hint" id="presetNote" hidden></p>
+        <p class="hint" id="hn-restr">Desde la fecha de reestructuración los flujos programados (cupón y amortización) se pagan con haircut y el precio de salida es su valor presente al exit yield B. Lo anterior se cobra completo.</p>
+        <div class="controls" id="pn-shift" hidden>
+          <label class="f narrow">Shift B sobre yield A, por defecto (bps)<input type="number" id="bShift" step="50"></label>
+        </div>
+        <p class="hint" id="hn-shift" hidden>Yield B = yield A de cada bono + shift (en la exit date); en la prob. implícita, yield de descuento A + shift. Es el valor por defecto: podés pisarlo bono por bono en la columna Shift B de la tabla.</p>
+        <div class="controls" id="pn-parity" hidden>
+          <label class="f narrow">Paridad B (%)<input type="number" id="bPar" min="0" step="1"></label>
+        </div>
+        <p class="hint" id="hn-parity" hidden>Precio B = paridad × valor técnico (capital residual + corridos) a la fecha correspondiente.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Resultados por bono</h2>
+    <p class="hint">Solo Bonares por ahora, ordenados por duration (menor a mayor). Click en una fila para ver su descomposición y sensibilidad. Editá el precio sucio de entrada o el exit yield (%) directo en la tabla. Los shifts de A y de B se pueden fijar <b>bono por bono</b> en las columnas Shift A y Shift B (vacío = valor por defecto). <b>Doble click en un bono</b> para ver el detalle de todos sus flujos, tasas y supuestos.</p>
+    <div class="tw"><table id="tbl">
+      <thead>
+      <tr class="gh"><th colspan="5">Entrada</th><th colspan="4" class="gA" title="Salida en el escenario A (performing): exit yield, precio y paridad">Salida · A performing</th><th colspan="4" class="gB" title="Salida en el escenario B">Salida · B <span class="bname">reestructuración</span></th><th colspan="3" class="gE" title="Salida esperada = (1−p)·A + p·B">Salida · esperada</th><th colspan="9" title="Retorno esperado (ponderado), y el retorno de cada escenario al final">Retorno</th><th colspan="5" title="Precio de salida que anula el retorno total: precio de entrada + fondeo − flujos cobrados y reinvertidos">Breakeven · retorno total = 0</th></tr>
+      <tr>
+        <th>Bono</th><th>Precio entrada</th><th>TIR entrada</th><th title="Duration modificada a la TIR de entrada, en años">Duration</th><th title="Precio sucio / valor técnico (capital residual + intereses corridos)">Paridad entrada</th>
+        <th title="Shift (bps) sobre la TIR de entrada de este bono para su exit yield A. Vacío = usa el shift global. Si escribís un Yield A propio, ese manda">Shift A (bps)</th><th title="Exit yield del escenario A (performing). Editable">Yield A %</th><th title="Precio de salida en A">Precio A</th><th title="Precio A / valor técnico a la exit date">Paridad A</th><th title="Shift (bps) sobre el yield A de este bono para valuar B. Solo se usa con B en modo shift de yields. Vacío = usa el shift de B global">Shift B (bps)</th><th title="Yield que implica el precio B sobre los flujos originales">Yield B %</th><th class="bn" title="Precio de salida en B">Precio B</th><th title="Precio B / valor técnico a la exit date">Paridad B</th><th title="Yield que implica el precio esperado sobre los flujos originales">Yield esp. %</th><th title="(1−p)·A + p·B">Precio esp.</th><th title="Precio esperado / valor técnico a la exit date">Paridad esp.</th>
+        <th title="Cupones y amortizaciones cobrados entre entrada y salida, ponderados">Flujos cobrados</th><th>Reinversión</th><th>Fondeo</th><th>Retorno USD</th><th>Retorno %</th><th>Anualizado</th><th title="Retorno total % si ocurre A">Ret. A %</th><th title="Retorno total % si ocurre B">Ret. B %</th><th title="Upside / downside = Ret. A % ÷ pérdida en B (−Ret. B %). Cuántos puntos ganás en A por cada punto que perdés en B. Sin downside (—) si B no pierde. Es independiente de la probabilidad">Up / Down</th>
+        <th title="Yield que implica el precio BE sobre los flujos originales">Yield BE %</th><th title="Yield BE menos TIR de entrada. Positivo: cuánto puede subir el yield antes de perder plata">Δ vs TIR ent. (bps)</th><th title="Precio sucio de salida, a la exit date, que hace el retorno total cero. No depende de cómo valúa cada escenario al bono">Precio BE</th><th title="Precio BE / valor técnico a la exit date">Paridad BE</th><th title="Probabilidad de B a la que el retorno esperado es cero, dados A y B (solo si A gana y B pierde)">Prob. B BE</th>
+      </tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card" id="detail" hidden>
+    <div class="dh"><div><h2 id="dTitle"></h2><p class="hint" id="dSub" style="margin:2px 0 0"></p></div><button type="button" id="dClose">Cerrar</button></div>
+    <div class="kvs" id="dKv"></div>
+    <h3 class="dsec">Composición del retorno</h3>
+    <div class="tw"><table id="dComp" class="dt"></table></div>
+    <h3 class="dsec">Flujos del bono por escenario, tasas de descuento y reinversión</h3>
+    <p class="hint" id="dHint"></p>
+    <div class="tw"><table id="dFlows" class="dt"></table></div>
+  </section>
+
+  <section class="card" id="impl">
+    <h2>Probabilidad implícita en el precio de hoy</h2>
+    <p class="hint">Despeja p para que el VPN a la fecha de entrada de los flujos de A y de B, ponderados por probabilidad, sea igual al precio de entrada: (1 − p) × VPN A + p × VPN B = precio. A: flujos originales descontados al yield de descuento A (se define en la sección de supuestos de los escenarios). B: según el modo elegido en la sección de escenarios (reestructuración con haircut, shift de yields sobre el yield de descuento A, o paridad × valor técnico a la fecha de entrada). El resultado es muy sensible a esas dos tasas; el valor de A es de ejemplo.</p>
+    <div class="controls">
+      <span class="hint" id="isum" style="padding-bottom:8px"></span>
+      <button id="applyImp" type="button"></button>
+    </div>
+    <div class="legend"><span><i style="background:var(--c3)"></i>A performing</span><span><i style="background:var(--c2)"></i>B · <span class="bname">reestructuración</span></span></div>
+    <div class="tw"><table id="itbl"><thead><tr><th>Bono</th><th>Precio hoy</th><th>VPN A</th><th>VPN B</th><th>Prob. implícita · A (verde) y B (naranja)</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card"><h2>Retorno total esperado por bono</h2><p class="hint" id="barsub"></p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>esperado (barra)</span><span><i class="dot" style="background:var(--c3)"></i>A performing</span><span><i class="dot" style="background:var(--c2)"></i>B · <span class="bname">reestructuración</span></span></div>
+      <div class="chart" id="bars"></div></section>
+    <section class="card"><h2 id="wfTitle">Descomposición</h2><p class="hint">USD cada 100 VN, bono seleccionado.</p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>suma</span><span><i style="background:var(--neg)"></i>resta</span><span><i style="background:var(--ink2)"></i>total</span></div>
+      <div class="chart" id="wf"></div></section>
+  </div>
+
+  <section class="card">
+    <h2 id="hmTitle">Sensibilidad</h2>
+    <p class="hint">Retorno total esperado % según el exit yield del escenario A (shift sobre la TIR de entrada) y la exit date; el escenario B queda fijo. Con probabilidad de B en 0% el retorno no depende de B, y con 100% no depende del yield A. Click en una celda para aplicarla a este bono.</p>
+    <div class="legend"><span><i style="background:var(--hm-pos)"></i>retorno positivo</span><span><i style="background:var(--hm-neg)"></i>retorno negativo</span><span>borde = escenario actual</span></div>
+    <div class="chart" id="hm"></div>
+  </section>
+
+  <section class="card notes">
+    <h2>Convenciones</h2>
+    <ul>
+      <li>Precio de entrada y de salida son <b>sucios</b> (precio de mercado de Rava incluye intereses corridos). El precio de salida es el valor presente del flujo remanente al exit yield.</li>
+      <li>Un flujo fechado en o antes de la entrada es del vendedor. Uno fechado en la exit date se cobra y no entra en el precio de salida.</li>
+      <li>Cada flujo cobrado (cupón + amortización) se reinvierte desde su fecha de pago hasta la exit date a la tasa libre de riesgo (TEA).</li>
+      <li>Fondeo = precio de entrada financiado desde la entrada hasta la exit date. Retorno total = −precio de entrada + flujos reinvertidos + precio de salida − fondeo.</li>
+      <li>Anualizado = (1 + retorno %)^(365/días) − 1, con los días entre entrada y exit date.</li>
+      <li><b>Universo:</b> Bonares = ley argentina (AL, AE38 y los bonos del Tesoro AN29/AO). Los Globales (ley Nueva York, GD) están ocultos por ahora. Los bonos van ordenados por <b>duration modificada</b> (años, act/365) calculada a la TIR de entrada.</li>
+      <li><b>Paridad</b> = precio sucio / valor técnico, con valor técnico = capital residual + intereses corridos (definición BYMA, DECISIONS.md de bond-desk). Corridos = próximo cupón × días transcurridos / días del período. En la exit date, un pago que cae ese día ya se cobró, así que el valor técnico usa el capital después de esa amortización. Si el bono vence antes de la salida, la paridad de salida no aplica.</li>
+      <li><b>Igual que el motor:</b> para descontar, cada fecha de pago se corre al siguiente día hábil argentino (<code>payment_dates</code>), con el calendario del motor de bond-desk. TIR, duration, corridos y precio desde yield se verifican contra <code>analyse_bond</code> y su solver. Los pagos de 2028 en adelante usan la lista oficial de feriados que el motor usa de respaldo, porque no hay feriados resueltos para esos años.</li>
+      <li>Un flujo cobrado se reinvierte desde su fecha de pago corrida (cuando llega la plata). Si esa fecha cae después de la exit date, no se reinvierte nada. La exit date es calendario, sin ajuste por días hábiles.</li>
+      <li><b>Escenarios A y B:</b> el precio de salida es (1 − p) × A + p × B, y el retorno total, los flujos cobrados y la reinversión se ponderan igual (es lineal, así que ponderar los componentes o el resultado da lo mismo). A usa tu exit yield (TIR de entrada + shift, o el que escribas por bono). En modo reestructuración, B aplica el haircut a todos los flujos programados posteriores a la fecha de reestructuración (si es anterior a la exit date, también a los que se cobran entre esa fecha y la salida) y valúa el remanente al exit yield B, único para todos los bonos. En modo shift, B valúa los flujos originales al yield de A más el shift; en modo paridad, el precio es paridad × valor técnico a la exit date. El yield y la paridad de salida de cada escenario son los que su precio implica sobre los flujos originales (A: tu exit yield). El haircut es sobre los flujos (capital y cupones), con el calendario original. La paridad de salida usa el valor técnico original del bono. <b>Up / Down</b> es el retorno % de A dividido por la pérdida % de B (solo si B pierde): cuánto ganás si sale A por cada punto que perdés si sale B; no depende de la probabilidad. <b>Prob. B BE</b> es la probabilidad de B que deja el retorno esperado en cero, solo si A gana y B pierde.</li>
+      <li><b>Probabilidad implícita:</b> (1 − p) × VPN A + p × VPN B = precio de entrada, con los VPN a la fecha de entrada (flujos con fechas de pago corridas, igual que el resto). A usa los flujos originales al yield de descuento A (un input global); B se valúa según el modo elegido (reestructuración, shift o paridad) con los parámetros de la sección de escenarios. Si el precio queda fuera del rango entre VPN B y VPN A, p da menor a 0% o mayor a 100% y se marca en rojo: ningún mix de los dos escenarios lo explica con esas tasas. Depende mucho de los dos yields, y todos los bonos comparten el mismo yield A.</li>
+      <li><b>Breakeven:</b> el precio de salida, a la exit date, que deja el retorno total en cero: precio de entrada + fondeo − flujos cobrados y reinvertidos. No depende de cómo valúe cada escenario al bono; los escenarios solo entran por los flujos cobrados antes de la salida (iguales en A y B salvo que la reestructuración sea anterior o igual a la exit date; ahí se usan los flujos ponderados). El yield y la paridad BE son los que ese precio implica sobre los flujos originales (precio BE / valor técnico a la exit date). Un Δ positivo es cuánto puede subir el yield sobre la TIR de entrada antes de perder plata. Si el bono ya vence antes de la exit date, o el retorno es positivo incluso con precio cero, no hay breakeven (—).</li>
+      <li>La tasa libre de riesgo es un input tuyo; no hay curva de UST en bond-desk.</li>
+    </ul>
+  </section>
+</main>
+<div id="tip" role="status"></div>
+
+<script>
+// Total-return maths. Same formulas and conventions as total_return.py
+// (parity is checked by test_parity.js). Plain script: works inlined in the
+// page and via require() in node.
+(function (root) {
+  const DAY = 864e5, YEAR = 365;
+  const dayOf = (s) => { const p = s.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]) / DAY; };
+  const isoOf = (n) => new Date(n * DAY).toISOString().slice(0, 10);
+
+  function prep(bond) {
+    if (!bond._f) bond._f = bond.flows.map((r) => ({ t: dayOf(r[0]), c: r[1], a: r[2], p: dayOf(r[3]) }));
+    return bond._f;
+  }
+
+  // Dirty value at `settle` (day number) of the flows SCHEDULED after settle, each
+  // discounted from its pay date rolled to the next AR business day (engine.payment_dates).
+  // rs = {R, h} (optional): flows scheduled after day R are paid with a haircut h (amount x (1-h)).
+  function pvAt(flows, settle, y, rs) {
+    let s = 0;
+    for (const f of flows) {
+      if (f.t > settle) {
+        const k = rs && f.t > rs.R ? 1 - rs.h : 1;
+        s += k * (f.c + f.a) / Math.pow(1 + y, (f.p - settle) / YEAR);
+      }
+    }
+    return s;
+  }
+
+  // bisection, same bracket / tolerance as the engine's solve_ytm_tea
+  function solveYtm(bond, price, settle) {
+    const fl = prep(bond);
+    if (!fl.some((f) => f.t > settle)) return NaN;
+    let lo = -0.99, hi = 100.0;
+    for (let i = 0; i < 300; i++) {
+      const mid = (lo + hi) / 2;
+      const diff = pvAt(fl, settle, mid) - price;
+      if (Math.abs(diff) < 1e-10) return mid;
+      if ((pvAt(fl, settle, lo) - price) * diff < 0) hi = mid; else lo = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // modified duration in years, as engine.modified_duration: Macaulay / (1 + TEA), act/365
+  function modDur(bond, settle, y) {
+    let pvs = 0, w = 0;
+    for (const f of prep(bond)) {
+      if (f.t > settle) { const t = (f.p - settle) / YEAR, p = (f.c + f.a) / Math.pow(1 + y, t); pvs += p; w += t * p; }
+    }
+    return pvs ? (w / pvs) / (1 + y) : 0;
+  }
+  // accrued: upcoming coupon x elapsed fraction of the period (engine USD branch, calendar days)
+  function accruedAt(bond, day) {
+    let last = dayOf(bond.issue);
+    for (const f of prep(bond)) {
+      if (f.t <= day) last = f.t;
+      else return f.c * (day - last) / (f.t - last);
+    }
+    return 0;
+  }
+  // residual face: 100 minus amortizations paid on/before `day`
+  function residualAt(bond, day) {
+    let r = 100;
+    for (const f of prep(bond)) if (f.t <= day) r -= f.a;
+    return r;
+  }
+  // paridad (BYMA, DECISIONS.md): dirty price / valor tecnico, VT = residual + accrued
+  function parityAt(bond, day, dirty) {
+    const vt = residualAt(bond, day) + accruedAt(bond, day);
+    return vt > 1e-9 ? dirty / vt : NaN;
+  }
+
+  function totalReturn(bond, entryDay, entryPrice, exitDay, exitYtm, rf, fundOn, fundRate, rs, exitPx) {
+    if (!(exitDay > entryDay)) return null;
+    if (fundRate === undefined || fundRate === null) fundRate = rf;
+    const fl = prep(bond), held = exitDay - entryDay;
+    let coupons = 0, amorts = 0, reinvested = 0, residual = 100;
+    const collected = [];
+    for (const f of fl) {
+      if (f.t <= exitDay) residual -= f.a;
+      if (f.t > entryDay && f.t <= exitDay) {
+        const k = rs && f.t > rs.R ? 1 - rs.h : 1;      // haircut on flows scheduled after the restructuring date
+        const fv = k * (f.c + f.a) * Math.pow(1 + rf, Math.max(0, exitDay - f.p) / YEAR);
+        coupons += k * f.c; amorts += k * f.a; reinvested += fv;
+        collected.push({ t: f.t, c: k * f.c, a: k * f.a, fv });
+      }
+    }
+    const hasRem = fl.some((f) => f.t > exitDay);
+    const exitPrice = hasRem ? (exitPx != null ? exitPx : pvAt(fl, exitDay, exitYtm, rs)) : 0;   // exitPx: price given directly (parity mode)
+    const funding = fundOn ? entryPrice * (Math.pow(1 + fundRate, held / YEAR) - 1) : 0;
+    const tr = -entryPrice + reinvested + exitPrice - funding;
+    const pct = tr / entryPrice;
+    return {
+      held, entryPrice, exitPrice, pricePnl: exitPrice - entryPrice, coupons, amorts,
+      reinvestIncome: reinvested - coupons - amorts, funding, tr, pct,
+      ann: pct > -1 ? Math.pow(1 + pct, YEAR / held) - 1 : -1,
+      residual, collected,
+      accruedEntry: accruedAt(bond, entryDay), accruedExit: accruedAt(bond, exitDay),
+      residualEntry: residualAt(bond, entryDay),
+      parityEntry: parityAt(bond, entryDay, entryPrice),
+      parityExit: hasRem ? parityAt(bond, exitDay, exitPrice) : NaN,
+    };
+  }
+
+  // Yield (TEA) that a given dirty price implies at `day` on the ORIGINAL flows (no restructuring).
+  function impliedYield(bond, price, day) {
+    const fl = prep(bond);
+    if (!(price > 1e-9) || !fl.some((f) => f.t > day)) return NaN;
+    const y = solveYtm(bond, price, day);
+    return Math.abs(pvAt(fl, day, y) - price) < 1e-6 ? y : NaN;
+  }
+  const techValueAt = (bond, day) => residualAt(bond, day) + accruedAt(bond, day);   // valor tecnico
+
+  // Scenario B return, by mode:
+  //  'restr' (default): flows scheduled after B.R pay (1-B.h); exit price = their PV at B.y
+  //  'shift': original flows valued at the exit yield of A + B.shift (bps)
+  //  'parity': exit price = B.par (fraction) x valor tecnico at the exit date
+  function bReturn(bond, entryDay, entryPrice, exitDay, yA, rf, fundOn, fundRate, B) {
+    const mode = B.mode || 'restr';
+    if (mode === 'shift') return totalReturn(bond, entryDay, entryPrice, exitDay, yA + B.shift / 1e4, rf, fundOn, fundRate, null);
+    if (mode === 'parity') return totalReturn(bond, entryDay, entryPrice, exitDay, yA, rf, fundOn, fundRate, null, B.par * techValueAt(bond, exitDay));
+    return totalReturn(bond, entryDay, entryPrice, exitDay, B.y, rf, fundOn, fundRate, { R: B.R, h: B.h });
+  }
+
+  // Two-scenario exit. A = performing (exit yield yA, original flows); B = see bReturn.
+  // B.p is the probability of B. Everything is the probability-weighted average of the two
+  // scenarios (linear, so weighting the exit price and the collected flows = weighting the returns).
+  // Each result also carries parityExit and yExit (the yield its exit price implies on the original flows).
+  const WKEYS = ['exitPrice', 'pricePnl', 'coupons', 'amorts', 'reinvestIncome', 'funding', 'tr'];
+  function scenario(bond, entryDay, entryPrice, exitDay, yA, rf, fundOn, fundRate, B) {
+    const A = totalReturn(bond, entryDay, entryPrice, exitDay, yA, rf, fundOn, fundRate, null);
+    if (!A) return null;
+    const Bs = bReturn(bond, entryDay, entryPrice, exitDay, yA, rf, fundOn, fundRate, B);
+    const E = Object.assign({}, A);
+    for (const k of WKEYS) E[k] = (1 - B.p) * A[k] + B.p * Bs[k];
+    E.pct = E.tr / entryPrice;
+    E.ann = E.pct > -1 ? Math.pow(1 + E.pct, YEAR / A.held) - 1 : -1;
+    E.parityExit = Number.isFinite(A.parityExit) ? parityAt(bond, exitDay, E.exitPrice) : NaN;
+    A.yExit = Number.isFinite(A.parityExit) ? yA : NaN;
+    Bs.yExit = impliedYield(bond, Bs.exitPrice, exitDay);
+    E.yExit = impliedYield(bond, E.exitPrice, exitDay);
+    return { A, B: Bs, E, p: B.p };
+  }
+
+  // Risk / reward of the two-point return distribution: rA with prob 1-p, rB with prob p (returns are
+  // net of funding, i.e. already excess over the funding rate). Sharpe = E[r] / stdev; Sortino = E[r] / downside
+  // deviation, with the downside measured against 0 (= break-even after funding) and squared, so it punishes
+  // big losses much more than a plain stdev. NaN when the denominator is 0 (p = 0 or 1; no losing outcome).
+  function riskStats(rA, rB, p) {
+    const er = (1 - p) * rA + p * rB;
+    const sd = Math.sqrt((1 - p) * (rA - er) ** 2 + p * (rB - er) ** 2);
+    const dd = Math.sqrt((1 - p) * Math.min(0, rA) ** 2 + p * Math.min(0, rB) ** 2);
+    return { er, sd, dd, sharpe: sd > 1e-12 ? er / sd : NaN, sortino: dd > 1e-12 ? er / dd : NaN };
+  }
+
+  // Cash-flow detail of every flow of the bond, for scenarios A and B (the composition of every number).
+  //  phase: 'seller' (scheduled <= entry), 'collected' (entry < sched <= exit: collected and reinvested at rf),
+  //         'exit' (sched > exit: part of the exit price).
+  //  Per scenario S: amt (amount paid in S, after any haircut), and
+  //    collected: days (reinvestment days, pay date -> exit), fac, fv;
+  //    exit-phase: rx (exit discount rate), df, pv;   entry NPV (every flow after entry): re (rate), dfe, npv.
+  //  rate null = no per-flow valuation (parity mode: the exit / entry price is paridad x valor tecnico).
+  function detail(bond, entryDay, exitDay, yA, rf, yAd, B) {
+    const fl = prep(bond), mode = B.mode || 'restr';
+    const rate = {
+      A: { x: yA, e: yAd },
+      B: mode === 'shift' ? { x: yA + B.shift / 1e4, e: yAd + B.shift / 1e4 }
+        : mode === 'parity' ? { x: null, e: null } : { x: B.y, e: B.y },
+    };
+    const rows = fl.map((f) => {
+      const tot = f.c + f.a;
+      const phase = f.t <= entryDay ? 'seller' : f.t <= exitDay ? 'collected' : 'exit';
+      const row = { t: f.t, p: f.p, c: f.c, a: f.a, tot, phase };
+      for (const S of ['A', 'B']) {
+        const k = S === 'B' && mode === 'restr' && f.t > B.R ? 1 - B.h : 1;
+        const o = { k, amt: k * tot };
+        if (phase === 'collected') {
+          o.days = Math.max(0, exitDay - f.p); o.fac = Math.pow(1 + rf, o.days / YEAR); o.fv = o.amt * o.fac;
+        }
+        if (phase === 'exit' && rate[S].x !== null) {
+          o.rx = rate[S].x; o.df = Math.pow(1 + o.rx, -(f.p - exitDay) / YEAR); o.pv = o.amt * o.df;
+        }
+        if (phase !== 'seller' && rate[S].e !== null) {
+          o.re = rate[S].e; o.dfe = Math.pow(1 + o.re, -(f.p - entryDay) / YEAR); o.npv = o.amt * o.dfe;
+        }
+        row[S] = o;
+      }
+      return row;
+    });
+    const sum = (S, key, ph) => rows.reduce((a, r) => a + ((!ph || r.phase === ph) && r[S][key] != null ? r[S][key] : 0), 0);
+    const hasRem = rows.some((r) => r.phase === 'exit');
+    const vtExit = techValueAt(bond, exitDay), vtEntry = techValueAt(bond, entryDay);
+    const tot = {};
+    for (const S of ['A', 'B']) {
+      const parity = S === 'B' && mode === 'parity';
+      tot[S] = {
+        collected: sum(S, 'amt', 'collected'), fv: sum(S, 'fv'),
+        exitPrice: !hasRem ? 0 : parity ? B.par * vtExit : sum(S, 'pv'),
+        npvEntry: parity ? B.par * vtEntry : sum(S, 'npv'),
+      };
+    }
+    return { rows, rate, mode, tot, vtExit, vtEntry, hasRem };
+  }
+
+  // Breakeven (original formula): the exit price at exit date for which total return = 0.
+  //   needed exit price = entry price + funding - reinvested flows   (= exitPrice - totalReturn)
+  // It does not depend on how each scenario values the bond; scenarios only enter through the
+  // collected flows (identical in A and B unless the restructuring date is on/before the exit date,
+  // in which case the probability-weighted flows are used). The yield and parity are what that
+  // price implies on the ORIGINAL flows (no restructuring).
+  function breakeven(bond, entryDay, entryPrice, exitDay, rf, fundOn, fundRate, B) {
+    if (!prep(bond).some((f) => f.t > exitDay)) return null;           // matured: nothing to price
+    const r = B && B.p > 0
+      ? (scenario(bond, entryDay, entryPrice, exitDay, 0.1, rf, fundOn, fundRate, B) || {}).E
+      : totalReturn(bond, entryDay, entryPrice, exitDay, 0.1, rf, fundOn, fundRate, null);
+    if (!r) return null;
+    const price = r.exitPrice - r.tr;
+    if (!(price > 1e-9)) return { price, y: NaN, parity: NaN };         // already >= 0 even if the bond is worth 0
+    const y = solveYtm(bond, price, exitDay);
+    const ok = Math.abs(pvAt(prep(bond), exitDay, y) - price) < 1e-6;
+    return { price, y: ok ? y : NaN, parity: parityAt(bond, exitDay, price) };
+  }
+
+  // Probability of B implied by today's price: NPV at the entry (settlement) date of the scenario-A
+  // flows (original flows at yA) and of scenario B, weighted so that (1-p)*NPV_A + p*NPV_B = price
+  //  =>  p = (NPV_A - P)/(NPV_A - NPV_B).  NPV_B by mode:
+  //  'restr': flows after B.R haircut by B.h, discounted at B.y
+  //  'shift': original flows discounted at yA + B.shift (bps)
+  //  'parity': B.par x valor tecnico at the entry date
+  // p can fall outside [0,1] when the price is above NPV_A or below NPV_B: no mix explains it.
+  function impliedProb(bond, entryDay, entryPrice, yA, B) {
+    const fl = prep(bond);
+    if (!fl.some((f) => f.t > entryDay)) return null;
+    const mode = B.mode || 'restr';
+    const npvA = pvAt(fl, entryDay, yA, null);
+    const npvB = mode === 'shift' ? pvAt(fl, entryDay, yA + B.shift / 1e4, null)
+      : mode === 'parity' ? B.par * techValueAt(bond, entryDay)
+      : pvAt(fl, entryDay, B.y, { R: B.R, h: B.h });
+    const den = npvA - npvB;
+    return { npvA, npvB, pB: Math.abs(den) > 1e-9 ? (npvA - entryPrice) / den : NaN };
+  }
+
+  // Probability of B at which the expected return is zero, given the A and B total returns.
+  // Only defined when A earns and B loses.
+  function probBE(trA, trB) { return trA >= 0 && trB < 0 ? trA / (trA - trB) : NaN; }
+
+  const api = { dayOf, isoOf, prep, pvAt, solveYtm, totalReturn, modDur, accruedAt, residualAt, parityAt, breakeven, scenario, probBE, impliedProb, impliedYield, techValueAt, detail, riskStats };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.TRCore = api;
+})(this);
+
+</script>
+<script>
+const DATA = {"AE38":{"bond_type":"USD_ARG","issue":"2020-09-04","maturity":"2038-01-09","last_price_date":"2026-10-23","last_price":73.0,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",1.0,0.0,"2022-01-10"],["2022-07-09",1.0,0.0,"2022-07-11"],["2023-01-09",1.9375,0.0,"2023-01-09"],["2023-07-09",1.9375,0.0,"2023-07-10"],["2024-01-09",2.125,0.0,"2024-01-09"],["2024-07-09",2.125,0.0,"2024-07-10"],["2025-01-09",2.5,0.0,"2025-01-09"],["2025-07-09",2.5,0.0,"2025-07-10"],["2026-01-09",2.5,0.0,"2026-01-09"],["2026-07-09",2.5,0.0,"2026-07-13"],["2027-01-09",2.5,0.0,"2027-01-11"],["2027-07-09",2.5,4.5454545455,"2027-07-12"],["2028-01-09",2.3863636364,4.5454545455,"2028-01-10"],["2028-07-09",2.2727272727,4.5454545455,"2028-07-10"],["2029-01-09",2.1590909091,4.5454545455,"2029-01-09"],["2029-07-09",2.0454545455,4.5454545455,"2029-07-10"],["2030-01-09",1.9318181818,4.5454545455,"2030-01-09"],["2030-07-09",1.8181818182,4.5454545455,"2030-07-10"],["2031-01-09",1.7045454545,4.5454545455,"2031-01-09"],["2031-07-09",1.5909090909,4.5454545455,"2031-07-10"],["2032-01-09",1.4772727273,4.5454545455,"2032-01-09"],["2032-07-09",1.3636363636,4.5454545455,"2032-07-12"],["2033-01-09",1.25,4.5454545455,"2033-01-10"],["2033-07-09",1.1363636364,4.5454545455,"2033-07-11"],["2034-01-09",1.0227272727,4.5454545455,"2034-01-09"],["2034-07-09",0.9090909091,4.5454545455,"2034-07-10"],["2035-01-09",0.7954545455,4.5454545455,"2035-01-09"],["2035-07-09",0.6818181818,4.5454545455,"2035-07-10"],["2036-01-09",0.5681818182,4.5454545455,"2036-01-09"],["2036-07-09",0.4545454545,4.5454545455,"2036-07-10"],["2037-01-09",0.3409090909,4.5454545455,"2037-01-09"],["2037-07-09",0.2272727273,4.5454545455,"2037-07-10"],["2038-01-09",0.1136363636,4.5454545455,"2038-01-11"]]},"AL29":{"bond_type":"USD_ARG","issue":"2020-09-04","maturity":"2029-07-09","last_price_date":"2026-10-23","last_price":54.92,"flows":[["2021-07-09",0.8472222222,0.0,"2021-07-12"],["2022-01-09",0.5,0.0,"2022-01-10"],["2022-07-09",0.5,0.0,"2022-07-11"],["2023-01-09",0.5,0.0,"2023-01-09"],["2023-07-09",0.5,0.0,"2023-07-10"],["2024-01-09",0.5,0.0,"2024-01-09"],["2024-07-09",0.5,0.0,"2024-07-10"],["2025-01-09",0.5,10.0,"2025-01-09"],["2025-07-09",0.45,10.0,"2025-07-10"],["2026-01-09",0.4,10.0,"2026-01-09"],["2026-07-09",0.35,10.0,"2026-07-13"],["2027-01-09",0.3,10.0,"2027-01-11"],["2027-07-09",0.25,10.0,"2027-07-12"],["2028-01-09",0.2,10.0,"2028-01-10"],["2028-07-09",0.15,10.0,"2028-07-10"],["2029-01-09",0.1,10.0,"2029-01-09"],["2029-07-09",0.05,10.0,"2029-07-10"]]},"AL30":{"bond_type":"USD_ARG","issue":"2020-09-04","maturity":"2030-07-09","last_price_date":"2026-10-23","last_price":55.08,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",0.25,0.0,"2022-01-10"],["2022-07-09",0.25,0.0,"2022-07-11"],["2023-01-09",0.25,0.0,"2023-01-09"],["2023-07-09",0.25,0.0,"2023-07-10"],["2024-01-09",0.375,0.0,"2024-01-09"],["2024-07-09",0.375,4.0,"2024-07-10"],["2025-01-09",0.36,8.0,"2025-01-09"],["2025-07-09",0.33,8.0,"2025-07-10"],["2026-01-09",0.3,8.0,"2026-01-09"],["2026-07-09",0.27,8.0,"2026-07-13"],["2027-01-09",0.24,8.0,"2027-01-11"],["2027-07-09",0.21,8.0,"2027-07-12"],["2028-01-09",0.42,8.0,"2028-01-10"],["2028-07-09",0.35,8.0,"2028-07-10"],["2029-01-09",0.28,8.0,"2029-01-09"],["2029-07-09",0.21,8.0,"2029-07-10"],["2030-01-09",0.14,8.0,"2030-01-09"],["2030-07-09",0.07,8.0,"2030-07-10"]]},"AL35":{"bond_type":"USD_ARG","issue":"2020-09-04","maturity":"2035-07-09","last_price_date":"2026-10-23","last_price":69.56,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",0.5625,0.0,"2022-01-10"],["2022-07-09",0.5625,0.0,"2022-07-11"],["2023-01-09",0.75,0.0,"2023-01-09"],["2023-07-09",0.75,0.0,"2023-07-10"],["2024-01-09",1.8125,0.0,"2024-01-09"],["2024-07-09",1.8125,0.0,"2024-07-10"],["2025-01-09",2.0625,0.0,"2025-01-09"],["2025-07-09",2.0625,0.0,"2025-07-10"],["2026-01-09",2.0625,0.0,"2026-01-09"],["2026-07-09",2.0625,0.0,"2026-07-13"],["2027-01-09",2.0625,0.0,"2027-01-11"],["2027-07-09",2.0625,0.0,"2027-07-12"],["2028-01-09",2.375,0.0,"2028-01-10"],["2028-07-09",2.375,0.0,"2028-07-10"],["2029-01-09",2.5,0.0,"2029-01-09"],["2029-07-09",2.5,0.0,"2029-07-10"],["2030-01-09",2.5,0.0,"2030-01-09"],["2030-07-09",2.5,0.0,"2030-07-10"],["2031-01-09",2.5,10.0,"2031-01-09"],["2031-07-09",2.25,10.0,"2031-07-10"],["2032-01-09",2.0,10.0,"2032-01-09"],["2032-07-09",1.75,10.0,"2032-07-12"],["2033-01-09",1.5,10.0,"2033-01-10"],["2033-07-09",1.25,10.0,"2033-07-11"],["2034-01-09",1.0,10.0,"2034-01-09"],["2034-07-09",0.75,10.0,"2034-07-10"],["2035-01-09",0.5,10.0,"2035-01-09"],["2035-07-09",0.25,10.0,"2035-07-10"]]},"AL41":{"bond_type":"USD_ARG","issue":"2020-09-04","maturity":"2041-07-09","last_price_date":"2026-10-23","last_price":64.65,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",1.25,0.0,"2022-01-10"],["2022-07-09",1.25,0.0,"2022-07-11"],["2023-01-09",1.75,0.0,"2023-01-09"],["2023-07-09",1.75,0.0,"2023-07-10"],["2024-01-09",1.75,0.0,"2024-01-09"],["2024-07-09",1.75,0.0,"2024-07-10"],["2025-01-09",1.75,0.0,"2025-01-09"],["2025-07-09",1.75,0.0,"2025-07-10"],["2026-01-09",1.75,0.0,"2026-01-09"],["2026-07-09",1.75,0.0,"2026-07-13"],["2027-01-09",1.75,0.0,"2027-01-11"],["2027-07-09",1.75,0.0,"2027-07-12"],["2028-01-09",1.75,3.5714285714,"2028-01-10"],["2028-07-09",1.6875,3.5714285714,"2028-07-10"],["2029-01-09",1.625,3.5714285714,"2029-01-09"],["2029-07-09",1.5625,3.5714285714,"2029-07-10"],["2030-01-09",2.0892857143,3.5714285714,"2030-01-09"],["2030-07-09",2.0022321429,3.5714285714,"2030-07-10"],["2031-01-09",1.9151785714,3.5714285714,"2031-01-09"],["2031-07-09",1.828125,3.5714285714,"2031-07-10"],["2032-01-09",1.7410714286,3.5714285714,"2032-01-09"],["2032-07-09",1.6540178571,3.5714285714,"2032-07-12"],["2033-01-09",1.5669642857,3.5714285714,"2033-01-10"],["2033-07-09",1.4799107143,3.5714285714,"2033-07-11"],["2034-01-09",1.3928571429,3.5714285714,"2034-01-09"],["2034-07-09",1.3058035714,3.5714285714,"2034-07-10"],["2035-01-09",1.21875,3.5714285714,"2035-01-09"],["2035-07-09",1.1316964286,3.5714285714,"2035-07-10"],["2036-01-09",1.0446428571,3.5714285714,"2036-01-09"],["2036-07-09",0.9575892857,3.5714285714,"2036-07-10"],["2037-01-09",0.8705357143,3.5714285714,"2037-01-09"],["2037-07-09",0.7834821429,3.5714285714,"2037-07-10"],["2038-01-09",0.6964285714,3.5714285714,"2038-01-11"],["2038-07-09",0.609375,3.5714285714,"2038-07-12"],["2039-01-09",0.5223214286,3.5714285714,"2039-01-10"],["2039-07-09",0.4352678571,3.5714285714,"2039-07-11"],["2040-01-09",0.3482142857,3.5714285714,"2040-01-09"],["2040-07-09",0.2611607143,3.5714285714,"2040-07-10"],["2041-01-09",0.1741071429,3.5714285714,"2041-01-09"],["2041-07-09",0.0870535714,3.5714285714,"2041-07-10"]]},"AN29":{"bond_type":"USD_ARG","issue":"2025-12-12","maturity":"2029-11-30","last_price_date":"2026-10-23","last_price":88.7,"flows":[["2026-05-30",3.0333333333,0.0,"2026-06-01"],["2026-11-30",3.25,0.0,"2026-11-30"],["2027-05-30",3.25,0.0,"2027-05-31"],["2027-11-30",3.25,0.0,"2027-11-30"],["2028-05-30",3.25,0.0,"2028-05-30"],["2028-11-30",3.25,0.0,"2028-11-30"],["2029-05-30",3.25,0.0,"2029-05-30"],["2029-11-30",3.25,100.0,"2029-11-30"]]},"AO27":{"bond_type":"USD_ARG","issue":"2026-02-27","maturity":"2027-10-29","last_price_date":"2026-10-23","last_price":103.7,"flows":[["2026-03-31",0.5666666667,0.0,"2026-03-31"],["2026-04-30",0.5,0.0,"2026-04-30"],["2026-05-29",0.4833333333,0.0,"2026-05-29"],["2026-06-30",0.5166666667,0.0,"2026-06-30"],["2026-07-31",0.5,0.0,"2026-07-31"],["2026-08-31",0.5,0.0,"2026-08-31"],["2026-09-30",0.5,0.0,"2026-09-30"],["2026-10-30",0.5,0.0,"2026-10-30"],["2026-11-30",0.5,0.0,"2026-11-30"],["2026-12-30",0.5,0.0,"2026-12-30"],["2027-01-29",0.4833333333,0.0,"2027-01-29"],["2027-02-26",0.45,0.0,"2027-02-26"],["2027-03-31",0.5833333333,0.0,"2027-03-31"],["2027-04-30",0.5,0.0,"2027-04-30"],["2027-05-31",0.5,0.0,"2027-05-31"],["2027-06-30",0.5,0.0,"2027-06-30"],["2027-07-30",0.5,0.0,"2027-07-30"],["2027-08-31",0.5,0.0,"2027-08-31"],["2027-09-30",0.5,0.0,"2027-09-30"],["2027-10-29",0.4833333333,100.0,"2027-10-29"]]},"AO28":{"bond_type":"USD_ARG","issue":"2026-03-31","maturity":"2028-10-31","last_price_date":"2026-10-23","last_price":93.1,"flows":[["2026-04-30",0.5,0.0,"2026-04-30"],["2026-05-29",0.4833333333,0.0,"2026-05-29"],["2026-06-30",0.5166666667,0.0,"2026-06-30"],["2026-07-31",0.5,0.0,"2026-07-31"],["2026-08-31",0.5,0.0,"2026-08-31"],["2026-09-30",0.5,0.0,"2026-09-30"],["2026-10-30",0.5,0.0,"2026-10-30"],["2026-11-30",0.5,0.0,"2026-11-30"],["2026-12-30",0.5,0.0,"2026-12-30"],["2027-01-29",0.4833333333,0.0,"2027-01-29"],["2027-02-26",0.45,0.0,"2027-02-26"],["2027-03-31",0.5833333333,0.0,"2027-03-31"],["2027-04-30",0.5,0.0,"2027-04-30"],["2027-05-31",0.5,0.0,"2027-05-31"],["2027-06-30",0.5,0.0,"2027-06-30"],["2027-07-30",0.5,0.0,"2027-07-30"],["2027-08-31",0.5,0.0,"2027-08-31"],["2027-09-30",0.5,0.0,"2027-09-30"],["2027-10-29",0.4833333333,0.0,"2027-10-29"],["2027-11-30",0.5166666667,0.0,"2027-11-30"],["2027-12-30",0.5,0.0,"2027-12-30"],["2028-01-31",0.5,0.0,"2028-01-31"],["2028-02-29",0.4833333333,0.0,"2028-03-01"],["2028-03-31",0.5333333333,0.0,"2028-03-31"],["2028-04-28",0.4666666667,0.0,"2028-04-28"],["2028-05-31",0.55,0.0,"2028-05-31"],["2028-06-30",0.5,0.0,"2028-06-30"],["2028-07-31",0.5,0.0,"2028-07-31"],["2028-08-31",0.5,0.0,"2028-08-31"],["2028-09-29",0.4833333333,0.0,"2028-09-29"],["2028-10-31",0.5333333333,100.0,"2028-10-31"]]},"AO29":{"bond_type":"USD_ARG","issue":"2026-07-17","maturity":"2029-10-31","last_price_date":"2026-10-23","last_price":86.8,"flows":[["2026-08-31",0.7333333333,0.0,"2026-08-31"],["2026-09-30",0.5,0.0,"2026-09-30"],["2026-10-30",0.5,0.0,"2026-10-30"],["2026-11-30",0.5,0.0,"2026-11-30"],["2026-12-30",0.5,0.0,"2026-12-30"],["2027-01-29",0.4833333333,0.0,"2027-01-29"],["2027-02-26",0.45,0.0,"2027-02-26"],["2027-03-31",0.5833333333,0.0,"2027-03-31"],["2027-04-30",0.5,0.0,"2027-04-30"],["2027-05-31",0.5,0.0,"2027-05-31"],["2027-06-30",0.5,0.0,"2027-06-30"],["2027-07-30",0.5,0.0,"2027-07-30"],["2027-08-31",0.5,0.0,"2027-08-31"],["2027-09-30",0.5,0.0,"2027-09-30"],["2027-10-29",0.4833333333,0.0,"2027-10-29"],["2027-11-30",0.5166666667,0.0,"2027-11-30"],["2027-12-30",0.5,0.0,"2027-12-30"],["2028-01-31",0.5,0.0,"2028-01-31"],["2028-02-29",0.4833333333,0.0,"2028-03-01"],["2028-03-31",0.5333333333,0.0,"2028-03-31"],["2028-04-28",0.4666666667,0.0,"2028-04-28"],["2028-05-31",0.55,0.0,"2028-05-31"],["2028-06-30",0.5,0.0,"2028-06-30"],["2028-07-31",0.5,0.0,"2028-07-31"],["2028-08-31",0.5,0.0,"2028-08-31"],["2028-09-29",0.4833333333,0.0,"2028-09-29"],["2028-10-31",0.5333333333,0.0,"2028-10-31"],["2028-11-30",0.5,0.0,"2028-11-30"],["2028-12-29",0.4833333333,0.0,"2028-12-29"],["2029-01-31",0.5333333333,0.0,"2029-01-31"],["2029-02-28",0.4666666667,0.0,"2029-02-28"],["2029-03-28",0.5,0.0,"2029-03-28"],["2029-04-30",0.5333333333,0.0,"2029-04-30"],["2029-05-31",0.5,0.0,"2029-05-31"],["2029-06-29",0.4833333333,0.0,"2029-06-29"],["2029-07-31",0.5333333333,0.0,"2029-07-31"],["2029-08-31",0.5,0.0,"2029-08-31"],["2029-09-28",0.4666666667,0.0,"2029-09-28"],["2029-10-31",0.55,100.0,"2029-10-31"]]},"GD29":{"bond_type":"USD_NY","issue":"2020-09-04","maturity":"2029-07-09","last_price_date":"2026-10-23","last_price":55.99,"flows":[["2021-07-09",0.8472222222,0.0,"2021-07-12"],["2022-01-09",0.5,0.0,"2022-01-10"],["2022-07-09",0.5,0.0,"2022-07-11"],["2023-01-09",0.5,0.0,"2023-01-09"],["2023-07-09",0.5,0.0,"2023-07-10"],["2024-01-09",0.5,0.0,"2024-01-09"],["2024-07-09",0.5,0.0,"2024-07-10"],["2025-01-09",0.5,10.0,"2025-01-09"],["2025-07-09",0.45,10.0,"2025-07-10"],["2026-01-09",0.4,10.0,"2026-01-09"],["2026-07-09",0.35,10.0,"2026-07-13"],["2027-01-09",0.3,10.0,"2027-01-11"],["2027-07-09",0.25,10.0,"2027-07-12"],["2028-01-09",0.2,10.0,"2028-01-10"],["2028-07-09",0.15,10.0,"2028-07-10"],["2029-01-09",0.1,10.0,"2029-01-09"],["2029-07-09",0.05,10.0,"2029-07-10"]]},"GD30":{"bond_type":"USD_NY","issue":"2020-09-04","maturity":"2030-07-09","last_price_date":"2026-10-23","last_price":56.47,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",0.25,0.0,"2022-01-10"],["2022-07-09",0.25,0.0,"2022-07-11"],["2023-01-09",0.25,0.0,"2023-01-09"],["2023-07-09",0.25,0.0,"2023-07-10"],["2024-01-09",0.375,0.0,"2024-01-09"],["2024-07-09",0.375,4.0,"2024-07-10"],["2025-01-09",0.36,8.0,"2025-01-09"],["2025-07-09",0.33,8.0,"2025-07-10"],["2026-01-09",0.3,8.0,"2026-01-09"],["2026-07-09",0.27,8.0,"2026-07-13"],["2027-01-09",0.24,8.0,"2027-01-11"],["2027-07-09",0.21,8.0,"2027-07-12"],["2028-01-09",0.42,8.0,"2028-01-10"],["2028-07-09",0.35,8.0,"2028-07-10"],["2029-01-09",0.28,8.0,"2029-01-09"],["2029-07-09",0.21,8.0,"2029-07-10"],["2030-01-09",0.14,8.0,"2030-01-09"],["2030-07-09",0.07,8.0,"2030-07-10"]]},"GD35":{"bond_type":"USD_NY","issue":"2020-09-04","maturity":"2035-07-09","last_price_date":"2026-10-23","last_price":73.88,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",0.5625,0.0,"2022-01-10"],["2022-07-09",0.5625,0.0,"2022-07-11"],["2023-01-09",0.75,0.0,"2023-01-09"],["2023-07-09",0.75,0.0,"2023-07-10"],["2024-01-09",1.8125,0.0,"2024-01-09"],["2024-07-09",1.8125,0.0,"2024-07-10"],["2025-01-09",2.0625,0.0,"2025-01-09"],["2025-07-09",2.0625,0.0,"2025-07-10"],["2026-01-09",2.0625,0.0,"2026-01-09"],["2026-07-09",2.0625,0.0,"2026-07-13"],["2027-01-09",2.0625,0.0,"2027-01-11"],["2027-07-09",2.0625,0.0,"2027-07-12"],["2028-01-09",2.375,0.0,"2028-01-10"],["2028-07-09",2.375,0.0,"2028-07-10"],["2029-01-09",2.5,0.0,"2029-01-09"],["2029-07-09",2.5,0.0,"2029-07-10"],["2030-01-09",2.5,0.0,"2030-01-09"],["2030-07-09",2.5,0.0,"2030-07-10"],["2031-01-09",2.5,10.0,"2031-01-09"],["2031-07-09",2.25,10.0,"2031-07-10"],["2032-01-09",2.0,10.0,"2032-01-09"],["2032-07-09",1.75,10.0,"2032-07-12"],["2033-01-09",1.5,10.0,"2033-01-10"],["2033-07-09",1.25,10.0,"2033-07-11"],["2034-01-09",1.0,10.0,"2034-01-09"],["2034-07-09",0.75,10.0,"2034-07-10"],["2035-01-09",0.5,10.0,"2035-01-09"],["2035-07-09",0.25,10.0,"2035-07-10"]]},"GD38":{"bond_type":"USD_NY","issue":"2020-09-04","maturity":"2038-01-09","last_price_date":"2026-10-23","last_price":78.9,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",1.0,0.0,"2022-01-10"],["2022-07-09",1.0,0.0,"2022-07-11"],["2023-01-09",1.9375,0.0,"2023-01-09"],["2023-07-09",1.9375,0.0,"2023-07-10"],["2024-01-09",2.125,0.0,"2024-01-09"],["2024-07-09",2.125,0.0,"2024-07-10"],["2025-01-09",2.5,0.0,"2025-01-09"],["2025-07-09",2.5,0.0,"2025-07-10"],["2026-01-09",2.5,0.0,"2026-01-09"],["2026-07-09",2.5,0.0,"2026-07-13"],["2027-01-09",2.5,0.0,"2027-01-11"],["2027-07-09",2.5,4.5454545455,"2027-07-12"],["2028-01-09",2.3863636364,4.5454545455,"2028-01-10"],["2028-07-09",2.2727272727,4.5454545455,"2028-07-10"],["2029-01-09",2.1590909091,4.5454545455,"2029-01-09"],["2029-07-09",2.0454545455,4.5454545455,"2029-07-10"],["2030-01-09",1.9318181818,4.5454545455,"2030-01-09"],["2030-07-09",1.8181818182,4.5454545455,"2030-07-10"],["2031-01-09",1.7045454545,4.5454545455,"2031-01-09"],["2031-07-09",1.5909090909,4.5454545455,"2031-07-10"],["2032-01-09",1.4772727273,4.5454545455,"2032-01-09"],["2032-07-09",1.3636363636,4.5454545455,"2032-07-12"],["2033-01-09",1.25,4.5454545455,"2033-01-10"],["2033-07-09",1.1363636364,4.5454545455,"2033-07-11"],["2034-01-09",1.0227272727,4.5454545455,"2034-01-09"],["2034-07-09",0.9090909091,4.5454545455,"2034-07-10"],["2035-01-09",0.7954545455,4.5454545455,"2035-01-09"],["2035-07-09",0.6818181818,4.5454545455,"2035-07-10"],["2036-01-09",0.5681818182,4.5454545455,"2036-01-09"],["2036-07-09",0.4545454545,4.5454545455,"2036-07-10"],["2037-01-09",0.3409090909,4.5454545455,"2037-01-09"],["2037-07-09",0.2272727273,4.5454545455,"2037-07-10"],["2038-01-09",0.1136363636,4.5454545455,"2038-01-11"]]},"GD41":{"bond_type":"USD_NY","issue":"2020-09-04","maturity":"2041-07-09","last_price_date":"2026-10-23","last_price":68.9,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",1.25,0.0,"2022-01-10"],["2022-07-09",1.25,0.0,"2022-07-11"],["2023-01-09",1.75,0.0,"2023-01-09"],["2023-07-09",1.75,0.0,"2023-07-10"],["2024-01-09",1.75,0.0,"2024-01-09"],["2024-07-09",1.75,0.0,"2024-07-10"],["2025-01-09",1.75,0.0,"2025-01-09"],["2025-07-09",1.75,0.0,"2025-07-10"],["2026-01-09",1.75,0.0,"2026-01-09"],["2026-07-09",1.75,0.0,"2026-07-13"],["2027-01-09",1.75,0.0,"2027-01-11"],["2027-07-09",1.75,0.0,"2027-07-12"],["2028-01-09",1.75,3.5714285714,"2028-01-10"],["2028-07-09",1.6875,3.5714285714,"2028-07-10"],["2029-01-09",1.625,3.5714285714,"2029-01-09"],["2029-07-09",1.5625,3.5714285714,"2029-07-10"],["2030-01-09",2.0892857143,3.5714285714,"2030-01-09"],["2030-07-09",2.0022321429,3.5714285714,"2030-07-10"],["2031-01-09",1.9151785714,3.5714285714,"2031-01-09"],["2031-07-09",1.828125,3.5714285714,"2031-07-10"],["2032-01-09",1.7410714286,3.5714285714,"2032-01-09"],["2032-07-09",1.6540178571,3.5714285714,"2032-07-12"],["2033-01-09",1.5669642857,3.5714285714,"2033-01-10"],["2033-07-09",1.4799107143,3.5714285714,"2033-07-11"],["2034-01-09",1.3928571429,3.5714285714,"2034-01-09"],["2034-07-09",1.3058035714,3.5714285714,"2034-07-10"],["2035-01-09",1.21875,3.5714285714,"2035-01-09"],["2035-07-09",1.1316964286,3.5714285714,"2035-07-10"],["2036-01-09",1.0446428571,3.5714285714,"2036-01-09"],["2036-07-09",0.9575892857,3.5714285714,"2036-07-10"],["2037-01-09",0.8705357143,3.5714285714,"2037-01-09"],["2037-07-09",0.7834821429,3.5714285714,"2037-07-10"],["2038-01-09",0.6964285714,3.5714285714,"2038-01-11"],["2038-07-09",0.609375,3.5714285714,"2038-07-12"],["2039-01-09",0.5223214286,3.5714285714,"2039-01-10"],["2039-07-09",0.4352678571,3.5714285714,"2039-07-11"],["2040-01-09",0.3482142857,3.5714285714,"2040-01-09"],["2040-07-09",0.2611607143,3.5714285714,"2040-07-10"],["2041-01-09",0.1741071429,3.5714285714,"2041-01-09"],["2041-07-09",0.0870535714,3.5714285714,"2041-07-10"]]},"GD46":{"bond_type":"USD_NY","issue":"2020-09-04","maturity":"2046-07-09","last_price_date":"2026-10-23","last_price":62.08,"flows":[["2021-07-09",0.1059027778,0.0,"2021-07-12"],["2022-01-09",0.5625,0.0,"2022-01-10"],["2022-07-09",0.5625,0.0,"2022-07-11"],["2023-01-09",0.75,0.0,"2023-01-09"],["2023-07-09",0.75,0.0,"2023-07-10"],["2024-01-09",1.8125,0.0,"2024-01-09"],["2024-07-09",1.8125,0.0,"2024-07-10"],["2025-01-09",2.0625,2.2727272727,"2025-01-09"],["2025-07-09",2.015625,2.2727272727,"2025-07-10"],["2026-01-09",1.96875,2.2727272727,"2026-01-09"],["2026-07-09",1.921875,2.2727272727,"2026-07-13"],["2027-01-09",1.875,2.2727272727,"2027-01-11"],["2027-07-09",1.828125,2.2727272727,"2027-07-12"],["2028-01-09",1.8892045455,2.2727272727,"2028-01-10"],["2028-07-09",1.8394886364,2.2727272727,"2028-07-10"],["2029-01-09",2.0454545455,2.2727272727,"2029-01-09"],["2029-07-09",1.9886363636,2.2727272727,"2029-07-10"],["2030-01-09",1.9318181818,2.2727272727,"2030-01-09"],["2030-07-09",1.875,2.2727272727,"2030-07-10"],["2031-01-09",1.8181818182,2.2727272727,"2031-01-09"],["2031-07-09",1.7613636364,2.2727272727,"2031-07-10"],["2032-01-09",1.7045454545,2.2727272727,"2032-01-09"],["2032-07-09",1.6477272727,2.2727272727,"2032-07-12"],["2033-01-09",1.5909090909,2.2727272727,"2033-01-10"],["2033-07-09",1.5340909091,2.2727272727,"2033-07-11"],["2034-01-09",1.4772727273,2.2727272727,"2034-01-09"],["2034-07-09",1.4204545455,2.2727272727,"2034-07-10"],["2035-01-09",1.3636363636,2.2727272727,"2035-01-09"],["2035-07-09",1.3068181818,2.2727272727,"2035-07-10"],["2036-01-09",1.25,2.2727272727,"2036-01-09"],["2036-07-09",1.1931818182,2.2727272727,"2036-07-10"],["2037-01-09",1.1363636364,2.2727272727,"2037-01-09"],["2037-07-09",1.0795454545,2.2727272727,"2037-07-10"],["2038-01-09",1.0227272727,2.2727272727,"2038-01-11"],["2038-07-09",0.9659090909,2.2727272727,"2038-07-12"],["2039-01-09",0.9090909091,2.2727272727,"2039-01-10"],["2039-07-09",0.8522727273,2.2727272727,"2039-07-11"],["2040-01-09",0.7954545455,2.2727272727,"2040-01-09"],["2040-07-09",0.7386363636,2.2727272727,"2040-07-10"],["2041-01-09",0.6818181818,2.2727272727,"2041-01-09"],["2041-07-09",0.625,2.2727272727,"2041-07-10"],["2042-01-09",0.5681818182,2.2727272727,"2042-01-09"],["2042-07-09",0.5113636364,2.2727272727,"2042-07-10"],["2043-01-09",0.4545454545,2.2727272727,"2043-01-09"],["2043-07-09",0.3977272727,2.2727272727,"2043-07-10"],["2044-01-09",0.3409090909,2.2727272727,"2044-01-11"],["2044-07-09",0.2840909091,2.2727272727,"2044-07-11"],["2045-01-09",0.2272727273,2.2727272727,"2045-01-09"],["2045-07-09",0.1704545455,2.2727272727,"2045-07-10"],["2046-01-09",0.1136363636,2.2727272727,"2046-01-09"],["2046-07-09",0.0568181818,2.2727272727,"2046-07-10"]]}};
+const C = TRCore;
+const $ = (id) => document.getElementById(id);
+const fmt = (n, d = 2) => Number.isFinite(n) ? n.toLocaleString('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+const pct = (n, d = 2) => Number.isFinite(n) ? fmt(n * 100, d) + '%' : '—';
+const sgn = (n, d = 2) => (n > 0 ? '+' : '') + fmt(n, d);
+
+// Which groups the page shows. Por ahora solo Bonares; agregar 'USD_NY' para volver a mostrar los Globales.
+const SHOW = ['USD_ARG'];
+const GROUPS = [['USD_NY', 'Globales · ley Nueva York', 'Globales'], ['USD_ARG', 'Bonares · ley argentina', 'Bonares']].filter((g) => SHOW.includes(g[0]));
+const TICKERS = Object.keys(DATA).filter((t) => SHOW.includes(DATA[t].bond_type))
+  .sort((a, b) => DATA[a].maturity.localeCompare(DATA[b].maturity) || a.localeCompare(b));
+const pctP = (n) => Number.isFinite(n) ? fmt(n * 100, 1) + '%' : '—';
+// Punto de partida elegido por Pedro: settle de entrada 5/nov/2026 y estos precios sucios USD.
+const START_ENTRY = '2026-11-05';
+const START_PX = { AO28: 82.05, AL29: 49.85, AO29: 74.8, AN29: 77.2, AL30: 49.7, AL35: 61.8, AE38: 64.5, AL41: 57.2, AO27: 96.7 };
+const startPrice = (t) => (START_PX[t] != null ? START_PX[t] : DATA[t].last_price);
+
+function nextBD(iso) { let n = C.dayOf(iso) + 1; while ([0, 6].includes(new Date(n * 864e5).getUTCDay())) n++; return C.isoOf(n); }
+
+const BASE_DATE = '2027-12-10';                      // fecha base de exit y de reestructuración
+const S = { entry: START_ENTRY, x: C.dayOf(BASE_DATE) - C.dayOf(START_ENTRY), rf: 4, fundOn: true, fundSame: true, fundRate: 4, shift: 0,
+            sel: 'AL30', price: {}, exitOv: {} };
+TICKERS.forEach((t) => { S.price[t] = startPrice(t); S.exitOv[t] = null; });
+
+S.pB = 0;                                           // probabilidad de B, en %
+S.rDate = BASE_DATE;                                 // valores de ejemplo para B
+S.hc = 30; S.yB = 20;
+/* Presets de severidad por bono (propuesta del doc de reestructuraciones, sec. 8): haircut % sobre flujos posteriores a R, exit yield B %, shift B bps */
+const PRESETS = {
+  low:  { AO27: [0, 12, 300], AO28: [0, 12, 300], AL29: [10, 12, 300], AO29: [10, 12, 300], AN29: [10, 12, 300], AL30: [10, 12, 300], AL35: [20, 14, 250], AE38: [25, 14, 250], AL41: [25, 14, 250] },
+  base: { AO27: [0, 16, 600], AO28: [15, 16, 600], AL29: [20, 16, 600], AO29: [25, 16, 600], AN29: [25, 16, 600], AL30: [25, 16, 600], AL35: [35, 18, 500], AE38: [40, 18, 500], AL41: [40, 18, 500] },
+  high: { AO27: [0, 20, 1000], AO28: [30, 20, 1000], AL29: [35, 20, 1000], AO29: [40, 20, 1000], AN29: [40, 20, 1000], AL30: [40, 20, 1000], AL35: [55, 22, 800], AE38: [60, 22, 800], AL41: [60, 22, 800] },
+};
+const PRESET_NAME = { low: 'baja', base: 'base', high: 'alta' };
+S.preset = 'manual'; S.hcB = {}; S.yBB = {};          // overrides por bono de haircut / exit yield B (null = valor por defecto)
+TICKERS.forEach((t) => { S.hcB[t] = null; S.yBB[t] = null; });
+function applyPreset(k) {
+  S.preset = k;
+  TICKERS.forEach((t) => {
+    const v = k !== 'manual' && PRESETS[k][t];
+    S.hcB[t] = v ? v[0] : null; S.yBB[t] = v ? v[1] : null; S.shiftB[t] = v ? v[2] : null;
+  });
+}
+S.detail = null;
+S.shiftA = {}; S.shiftB = {};                        // shift por bono (bps); null = valor por defecto
+TICKERS.forEach((t) => { S.shiftA[t] = null; S.shiftB[t] = null; });
+S.bMode = 'restr'; S.bShift = 500; S.bPar = 40;       // modo de valuación de B (ejemplos)
+S.yAd = 10;                                         // yield de descuento de A para la prob. implícita (ejemplo)
+const bParams = () => ({ p: S.pB / 100, mode: S.bMode, R: C.dayOf(S.rDate), h: S.hc / 100, y: S.yB / 100, shift: S.bShift, par: S.bPar / 100 });
+const bParamsFor = (t) => Object.assign(bParams(), { shift: S.shiftB[t] != null ? S.shiftB[t] : S.bShift, h: (S.hcB[t] != null ? S.hcB[t] : S.hc) / 100, y: (S.yBB[t] != null ? S.yBB[t] : S.yB) / 100 });
+const B_NAME = { restr: 'reestructuración', shift: 'shift de yields', parity: 'paridad' };
+const exitISO = () => C.isoOf(C.dayOf(S.entry) + S.x);
+
+/* ---------- controls ---------- */
+[30, 60, 90, 180, 365].forEach((v) => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = 't+' + v; b.dataset.v = v;
+  b.addEventListener('click', () => { S.x = v; syncInputs(); update(); });
+  $('presets').appendChild(b);
+});
+function syncInputs() {
+  $('entry').value = S.entry; $('x').value = S.x; $('exit').value = exitISO();
+  $('rf').value = S.rf; $('fundOn').checked = S.fundOn; $('fundSame').checked = S.fundSame;
+  $('fundRate').value = S.fundSame ? S.rf : S.fundRate; $('fundRate').disabled = !S.fundOn || S.fundSame;
+  $('fundSame').disabled = !S.fundOn; $('shift').value = S.shift;
+  [...$('presets').children].forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.v === S.x)));
+  syncB();
+}
+function syncB() {
+  $('pB').value = S.pB; $('pAv').textContent = (100 - S.pB) + '%'; $('pBv').textContent = S.pB + '%';
+  $('pbA').style.width = (100 - S.pB) + '%'; $('pbB').style.width = S.pB + '%';
+  $('rDate').value = S.rDate; $('hc').value = S.hc; $('yB').value = S.yB; $('yAd').value = S.yAd;
+  $('bPreset').value = S.preset; $('bMode').value = S.bMode; $('bShift').value = S.bShift; $('bPar').value = S.bPar;
+  ['restr', 'shift', 'parity'].forEach((k) => { $('pn-' + k).hidden = k !== S.bMode; $('hn-' + k).hidden = k !== S.bMode; });
+  document.querySelectorAll('.bname').forEach((n) => { n.textContent = B_NAME[S.bMode]; });
+  document.querySelectorAll('.bn').forEach((n) => { n.title = 'Precio de salida en B (' + B_NAME[S.bMode] + ')'; });
+  const pn = $('presetNote'); pn.hidden = S.preset === 'manual';
+  if (S.preset !== 'manual') pn.textContent = 'Preset ' + PRESET_NAME[S.preset] + ' (haircut % / exit yield B %): ' + TICKERS.map((t) => t + ' ' + (t === 'AO27' ? 'n/a (vence antes de R)' : PRESETS[S.preset][t][0] + '/' + PRESETS[S.preset][t][1])).join(' · ') + '. En modo shift se usan los shifts del preset; en paridad no aplica. Si cambiás haircut o exit yield globales el preset se desactiva.';
+  const d = C.dayOf(S.rDate) - C.dayOf(S.entry);
+  $('bsum').textContent = `Reestructuración a t+${d} · ${C.dayOf(S.rDate) > C.dayOf(S.entry) + S.x ? 'posterior' : 'anterior o igual'} a la exit date`;
+}
+const num = (el, fallback) => { const v = parseFloat(el.value); return Number.isFinite(v) ? v : fallback; };
+$('entry').addEventListener('change', () => { if ($('entry').value) { S.entry = $('entry').value; syncInputs(); update(); } });
+$('x').addEventListener('input', () => { const v = Math.round(num($('x'), S.x)); if (v >= 1) { S.x = v; $('exit').value = exitISO(); update(); } });
+$('exit').addEventListener('change', () => { if ($('exit').value) { const v = C.dayOf($('exit').value) - C.dayOf(S.entry); if (v >= 1) { S.x = v; syncInputs(); update(); } } });
+$('rf').addEventListener('input', () => { S.rf = num($('rf'), S.rf); if (S.fundSame) $('fundRate').value = S.rf; update(); });
+$('fundOn').addEventListener('change', () => { S.fundOn = $('fundOn').checked; syncInputs(); update(); });
+$('fundSame').addEventListener('change', () => { S.fundSame = $('fundSame').checked; syncInputs(); update(); });
+$('fundRate').addEventListener('input', () => { S.fundRate = num($('fundRate'), S.fundRate); update(); });
+$('shift').addEventListener('input', () => { S.shift = num($('shift'), 0); update(); });
+$('pB').addEventListener('input', () => { S.pB = +$('pB').value; syncB(); update(); });
+$('rDate').addEventListener('change', () => { if ($('rDate').value) { S.rDate = $('rDate').value; syncB(); update(); } });
+$('hc').addEventListener('input', () => { S.hc = Math.min(100, Math.max(0, num($('hc'), S.hc))); applyPreset('manual'); syncB(); update(); });
+$('yB').addEventListener('input', () => { S.yB = num($('yB'), S.yB); applyPreset('manual'); syncB(); update(); });
+$('bPreset').addEventListener('change', () => { applyPreset($('bPreset').value); buildRows(); syncB(); update(); });
+$('bMode').addEventListener('change', () => { S.bMode = $('bMode').value; syncB(); update(); });
+$('bShift').addEventListener('input', () => { S.bShift = num($('bShift'), S.bShift); update(); });
+$('bPar').addEventListener('input', () => { S.bPar = Math.max(0, num($('bPar'), S.bPar)); update(); });
+$('yAd').addEventListener('input', () => { S.yAd = num($('yAd'), S.yAd); update(); });
+$('applyImp').addEventListener('click', () => {
+  const m = M.find((x) => x.t === S.sel), ip = m && C.impliedProb(m.b, m.e, m.price, S.yAd / 100, bParamsFor(m.t));
+  if (ip && Number.isFinite(ip.pB)) { S.pB = Math.round(Math.min(1, Math.max(0, ip.pB)) * 100); syncB(); update(); }
+});
+$('resetPx').addEventListener('click', () => {
+  TICKERS.forEach((t) => { S.price[t] = startPrice(t); S.exitOv[t] = null; S.shiftA[t] = null; S.shiftB[t] = null; }); applyPreset('manual'); S.shift = 0; buildRows(); syncInputs(); update();
+});
+
+/* ---------- table ---------- */
+const cells = {}, rows = {}, grpRows = {};
+function buildRows() {
+  document.querySelector('#tbl tbody').textContent = '';
+  TICKERS.forEach((t) => {
+    const tr = document.createElement('tr'); tr.dataset.t = t; cells[t] = {};
+    const mk = (k, cls) => { const td = document.createElement('td'); if (cls) td.className = cls; cells[t][k] = td; tr.appendChild(td); return td; };
+    mk('tk', 'tk').textContent = t;
+    const tdP = mk('px'); const ip = document.createElement('input'); ip.type = 'number'; ip.step = '0.05'; ip.value = S.price[t];
+    ip.setAttribute('aria-label', 'Precio de entrada ' + t);
+    ip.addEventListener('input', () => { const v = parseFloat(ip.value); if (v > 0) { S.price[t] = v; update(); } });
+    ip.addEventListener('click', (e) => e.stopPropagation()); ip.addEventListener('dblclick', (e) => e.stopPropagation()); tdP.appendChild(ip);
+    mk('ytm'); mk('md'); mk('pe');
+    const shIn = (td, store, label) => {
+      const i = document.createElement('input'); i.type = 'number'; i.step = '25'; i.className = 'sh'; i.setAttribute('aria-label', label + ' ' + t);
+      if (store[t] != null) i.value = store[t];
+      i.addEventListener('input', () => { const v = parseFloat(i.value); store[t] = Number.isFinite(v) ? v : null; update(); });
+      i.addEventListener('click', (e) => e.stopPropagation()); i.addEventListener('dblclick', (e) => e.stopPropagation()); td.appendChild(i); return i;
+    };
+    cells[t].isA = shIn(mk('sa'), S.shiftA, 'Shift A');
+    const tdY = mk('xy'); const iy = document.createElement('input'); iy.type = 'number'; iy.step = '0.1';
+    iy.setAttribute('aria-label', 'Exit yield ' + t); if (S.exitOv[t] != null) iy.value = (S.exitOv[t] * 100).toFixed(2);
+    iy.addEventListener('input', () => { const v = parseFloat(iy.value); S.exitOv[t] = Number.isFinite(v) ? v / 100 : null; update(); });
+    iy.addEventListener('click', (e) => e.stopPropagation()); iy.addEventListener('dblclick', (e) => e.stopPropagation()); tdY.appendChild(iy); cells[t].iy = iy;
+    mk('pA'); mk('paA'); cells[t].isB = shIn(mk('sb'), S.shiftB, 'Shift B'); mk('yB'); mk('pB'); mk('paB'); mk('yE'); mk('exp'); mk('px2'); ['flows', 'reinv', 'fund', 'tr', 'pct', 'ann', 'rA', 'rB', 'ud', 'bey', 'bed', 'bep', 'bepar', 'bpp'].forEach((k) => mk(k));
+    tr.addEventListener('click', () => { S.sel = t; update(); });
+    tr.addEventListener('dblclick', () => { S.sel = t; S.detail = t; update(); $('detail').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    rows[t] = tr;
+  });
+  GROUPS.forEach(([bt, name]) => {
+    const g = document.createElement('tr'); g.className = 'grp'; const td = document.createElement('td');
+    td.colSpan = 30; td.textContent = name; g.appendChild(td); grpRows[bt] = g;
+  });
+}
+// place group headers and rows in the order of M (already grouped and sorted by duration)
+function arrange(M) {
+  const tb = document.querySelector('#tbl tbody'); const frag = document.createDocumentFragment();
+  GROUPS.forEach(([bt]) => { frag.appendChild(grpRows[bt]); M.filter((m) => m.b.bond_type === bt).forEach((m) => frag.appendChild(rows[m.t])); });
+  tb.appendChild(frag);
+}
+
+/* ---------- model ---------- */
+function model() {
+  const e = C.dayOf(S.entry), x = e + S.x, fr = S.fundSame ? S.rf / 100 : S.fundRate / 100;
+  return TICKERS.map((t) => {
+    const b = DATA[t], price = S.price[t], ytm = C.solveYtm(b, price, e);
+    const y = S.exitOv[t] != null ? S.exitOv[t] : ytm + (S.shiftA[t] != null ? S.shiftA[t] : S.shift) / 1e4;
+    const bp = bParamsFor(t);
+    const sc = Number.isFinite(ytm) ? C.scenario(b, e, price, x, y, S.rf / 100, S.fundOn, fr, bp) : null;
+    const r = sc ? sc.E : null;                       // expected (probability-weighted) result
+    const md = Number.isFinite(ytm) ? C.modDur(b, e, ytm) : NaN;
+    const be = Number.isFinite(ytm) ? C.breakeven(b, e, price, x, S.rf / 100, S.fundOn, fr, bp) : null;
+    return { t, b, price, ytm, y, r, sc, e, x, fr, md, be, pbe: sc ? C.probBE(sc.A.tr, sc.B.tr) : NaN };
+  }).sort((a, c) => GROUPS.findIndex((g) => g[0] === a.b.bond_type) - GROUPS.findIndex((g) => g[0] === c.b.bond_type)
+    || (Number.isFinite(a.md) ? a.md : 1e9) - (Number.isFinite(c.md) ? c.md : 1e9));
+}
+const setNum = (td, v, d = 2, cls) => { td.textContent = Number.isFinite(v) ? fmt(v, d) : '—'; td.className = cls || ''; };
+const signCls = (v) => (v < 0 ? 'neg' : v > 0 ? 'posv' : '');
+// celda con fondo azul (+) / rojo (−), más intenso cuanto mayor el valor respecto de ref
+const tint = (td, v, ref) => {
+  if (!Number.isFinite(v) || v === 0) { td.style.background = ''; return; }
+  const k = Math.round(Math.min(42, 6 + 36 * Math.min(1, Math.abs(v) / ref)));
+  td.style.background = `color-mix(in srgb, var(${v > 0 ? '--hm-pos' : '--hm-neg'}) ${k}%, transparent)`;
+};
+
+/* ---------- tooltip ---------- */
+const tip = $('tip');
+function showTip(ev, title, rows) {
+  tip.textContent = '';
+  const b = document.createElement('b'); b.textContent = title; tip.appendChild(b);
+  rows.forEach(([k, v]) => { const d = document.createElement('div'); d.className = 'row';
+    const a = document.createElement('span'); a.textContent = k; const c = document.createElement('span'); c.textContent = v; d.append(a, c); tip.appendChild(d); });
+  tip.style.display = 'block';
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad; if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => { tip.style.display = 'none'; };
+
+/* ---------- svg helpers ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+function el(name, attrs, parent, text) {
+  const n = document.createElementNS(NS, name);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  if (parent) parent.appendChild(n); return n;
+}
+function niceTicks(lo, hi, n = 5) {
+  if (lo === hi) { lo -= 1; hi += 1; }
+  const raw = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw);
+  const a = Math.floor(lo / step) * step, z = Math.ceil(hi / step) * step, out = [];
+  for (let v = a; v <= z + step / 2; v += step) out.push(Math.abs(v) < 1e-9 ? 0 : v);
+  return out;
+}
+function svgBase(host, h) {
+  host.textContent = ''; const w = Math.max(host.clientWidth, 300);
+  const svg = el('svg', { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: 'img' }, host); return { svg, w };
+}
+function yAxis(svg, ticks, y, left, w, right, suffix) {
+  ticks.forEach((v) => {
+    el('line', { x1: left, x2: w - right, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--axis)' : 'var(--grid)', 'stroke-width': 1 }, svg);
+    el('text', { x: left - 6, y: y(v) + 4, 'text-anchor': 'end', class: 'muted' }, svg, fmt(v, Number.isInteger(Math.round((ticks[1] - ticks[0]) * 1e6) / 1e6) ? 0 : 1) + (suffix || ''));
+  });
+}
+const rrect = (svg, x, y, w, h, fill, up, extra) => {
+  // 4px rounded data end, square at the baseline side
+  const r = Math.min(4, w / 2, Math.abs(h)); let d;
+  if (h <= 0.5) return null;
+  if (up) d = `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  else d = `M${x},${y}V${y + h - r}Q${x},${y + h} ${x + r},${y + h}H${x + w - r}Q${x + w},${y + h} ${x + w},${y + h - r}V${y}Z`;
+  return el('path', Object.assign({ d, fill }, extra || {}), svg);
+};
+
+/* ---------- bar chart: retorno % por bono ---------- */
+function drawBars(M) {
+  const host = $('bars'), H = 312, L = 44, R = 8, T = 34, B = 46, GAP = 20;
+  const { svg, w } = svgBase(host, H);
+  const vals = M.map((m) => (m.r ? m.r.pct * 100 : 0));
+  const allv = M.flatMap((m) => (m.sc ? [m.sc.A.pct * 100, m.sc.B.pct * 100, m.r.pct * 100] : [0]));
+  const ticks = niceTicks(Math.min(0, ...allv), Math.max(0, ...allv));
+  const lo = ticks[0], hi = ticks[ticks.length - 1];
+  const y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+  yAxis(svg, ticks, y, L, w, R, '%');
+  const slot = (w - L - R - GAP * (GROUPS.length - 1)) / M.length, bw = Math.max(6, slot - 6);
+  const imax = vals.indexOf(Math.max(...vals)), imin = vals.indexOf(Math.min(...vals));
+  const xs = []; let gi = -1, prev = null, cur = L;
+  M.forEach((m, i) => { if (m.b.bond_type !== prev) { if (prev !== null) cur += GAP; prev = m.b.bond_type; gi++; } xs.push(cur); cur += slot; });
+  GROUPS.forEach(([bt, , short]) => {
+    const idx = M.map((m, i) => (m.b.bond_type === bt ? i : -1)).filter((i) => i >= 0); if (!idx.length) return;
+    const x0 = xs[idx[0]], x1 = xs[idx[idx.length - 1]] + slot;
+    el('line', { x1: x0 + 2, x2: x1 - 2, y1: 20, y2: 20, stroke: 'var(--axis)' }, svg);
+    el('text', { x: (x0 + x1) / 2, y: 14, 'text-anchor': 'middle', class: 'lbl' }, svg, short);
+  });
+  M.forEach((m, i) => {
+    const x = xs[i] + (slot - bw) / 2, v = vals[i], isSel = m.t === S.sel;
+    const top = y(Math.max(v, 0)), hgt = Math.abs(y(v) - y(0));
+    rrect(svg, x, v >= 0 ? top : y(0), bw, hgt, isSel ? 'var(--s1-strong)' : 'var(--s1)', v >= 0);
+    const lx = xs[i] + slot / 2 + 4, ly = H - B + 14;
+    const lab = el('text', { x: lx, y: ly, 'text-anchor': 'end', class: isSel ? 'lbl' : '' }, svg, m.t);
+    lab.setAttribute('transform', `rotate(-40 ${lx} ${ly})`);
+    if (isSel || i === imax || i === imin) el('text', { x: x + bw / 2, y: (v >= 0 ? top - 5 : y(v) + 13), 'text-anchor': 'middle', class: 'lbl' }, svg, fmt(v, 1) + '%');
+    if (m.sc) {   // scenario markers: A performing (aqua) and B restructuring (orange), 2px surface ring
+      const cx = x + bw / 2;
+      el('circle', { cx, cy: y(m.sc.B.pct * 100), r: 5, fill: 'var(--c2)', stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
+      el('circle', { cx, cy: y(m.sc.A.pct * 100), r: 5, fill: 'var(--c3)', stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
+    }
+    const hit = el('rect', { x: xs[i], y: T, width: slot, height: H - T - B, fill: 'transparent', style: 'cursor:pointer' }, svg);
+    hit.addEventListener('pointermove', (ev) => m.r && showTip(ev, m.t, [['Retorno esperado', pct(m.r.pct)], ['Retorno A · B', pct(m.sc.A.pct) + ' · ' + pct(m.sc.B.pct)], ['Prob. B BE', Number.isFinite(m.pbe) ? fmt(m.pbe * 100, 0) + '%' : '—'], ['Anualizado', pct(m.r.ann)], ['USD / 100 VN', sgn(m.r.tr)], ['Duration', fmt(m.md)], ['Paridad ent. → sal.', pctP(m.r.parityEntry) + ' → ' + pctP(m.r.parityExit)], ['Yield breakeven', m.be && Number.isFinite(m.be.y) ? fmt(m.be.y * 100) + '% (' + sgn((m.be.y - m.ytm) * 1e4, 0) + ' bps)' : '—']]));
+    hit.addEventListener('pointerleave', hideTip); hit.addEventListener('click', () => { S.sel = m.t; update(); });
+  });
+}
+
+/* ---------- waterfall ---------- */
+function drawWaterfall(m) {
+  const host = $('wf'), H = 328, L = 44, R = 8, T = 34, B = 76;
+  const { svg, w } = svgBase(host, H);
+  $('wfTitle').textContent = 'Descomposición esperada · ' + m.t;
+  const r = m.r; if (!r) { return; }
+  const steps = [
+    ['Precio', r.pricePnl], ['Cupones', r.coupons], ['Amort.', r.amorts], ['Reinv.', r.reinvestIncome], ['Fondeo', -r.funding],
+  ];
+  let acc = 0; const bars = steps.map(([k, v]) => { const a = acc; acc += v; return { k, v, from: a, to: acc }; });
+  bars.push({ k: 'Total', v: acc, from: 0, to: acc, total: true });
+  const all = bars.flatMap((b) => [b.from, b.to, 0]);
+  const ticks = niceTicks(Math.min(...all), Math.max(...all));
+  const lo = ticks[0], hi = ticks[ticks.length - 1];
+  const y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+  yAxis(svg, ticks, y, L, w, R, '');
+  const slot = (w - L - R) / bars.length, bw = Math.min(54, slot - 10);
+  bars.forEach((b, i) => {
+    const x = L + i * slot + (slot - bw) / 2, top = y(Math.max(b.from, b.to)), bot = y(Math.min(b.from, b.to));
+    const fill = b.total ? 'var(--ink2)' : b.v >= 0 ? 'var(--s1)' : 'var(--neg)';
+    const hgt = Math.max(1.5, bot - top);
+    rrect(svg, x, top, bw, hgt, fill, b.v >= 0 || b.total);
+    el('text', { x: x + bw / 2, y: (b.v >= 0 ? top - 5 : bot + 13), 'text-anchor': 'middle', class: 'lbl' }, svg, sgn(b.v));
+    el('text', { x: L + i * slot + slot / 2, y: H - B + 16, 'text-anchor': 'middle', class: b.total ? 'lbl' : '' }, svg, b.k);
+    const hit = el('rect', { x: L + i * slot, y: T, width: slot, height: H - T - B, fill: 'transparent' }, svg);
+    hit.addEventListener('pointermove', (ev) => showTip(ev, b.k, [['USD / 100 VN', sgn(b.v, 3)], ...(b.total ? [['% sobre entrada', pct(r.pct)]] : [])]));
+    hit.addEventListener('pointerleave', hideTip);
+  });
+  el('text', { x: L, y: H - 36, class: 'muted' }, svg, `Entrada ${fmt(r.entryPrice)} · Salida ${fmt(r.exitPrice)} · ${r.held} días · flujos cobrados: ${r.collected.length}`);
+  el('text', { x: L, y: H - 21, class: 'muted' }, svg, `Paridad ${pctP(r.parityEntry)} → ${pctP(r.parityExit)} · corridos ${fmt(r.accruedEntry, 3)} → ${fmt(r.accruedExit, 3)} · capital residual ${fmt(r.residualEntry, 1)} → ${fmt(r.residual, 1)}`);
+  el('text', { x: L, y: H - 6, class: 'muted' }, svg, `Retorno A ${pct(m.sc.A.pct)} · B ${pct(m.sc.B.pct)} · esperado ${pct(r.pct)} (prob. B ${S.pB}%)`);
+}
+
+/* ---------- heatmap ---------- */
+const HM_SHIFTS = [-300, -200, -100, -50, 0, 50, 100, 200, 300];
+const HM_DAYS = [30, 60, 90, 120, 180, 270, 365, 540, 730];
+function mixColor(varName, t) { // t in 0..1 from neutral to pole, through CSS color-mix
+  return `color-mix(in srgb, var(${varName}) ${Math.round(t * 100)}%, var(--mid))`;
+}
+function drawHeat(m) {
+  const host = $('hm'), L = 78, R = 8, T = 24, B = 8, rowH = 30;
+  $('hmTitle').textContent = 'Sensibilidad · retorno esperado · ' + m.t;
+  const H = T + HM_SHIFTS.length * rowH + B; const { svg, w } = svgBase(host, H);
+  if (!Number.isFinite(m.ytm)) return;
+  const colW = (w - L - R) / HM_DAYS.length;
+  const bp = bParamsFor(m.t);
+  const grid = HM_SHIFTS.map((s) => HM_DAYS.map((d) => C.scenario(m.b, m.e, m.price, m.e + d, m.ytm + s / 1e4, S.rf / 100, S.fundOn, m.fr, bp).E));
+  const mx = Math.max(1e-9, ...grid.flat().map((r) => Math.abs(r.pct)));
+  HM_DAYS.forEach((d, j) => el('text', { x: L + j * colW + colW / 2, y: T - 8, 'text-anchor': 'middle', class: d === S.x ? 'lbl' : '' }, svg, 't+' + d));
+  HM_SHIFTS.forEach((s, i) => {
+    el('text', { x: L - 8, y: T + i * rowH + rowH / 2 + 4, 'text-anchor': 'end', class: s === 0 ? 'lbl' : '' }, svg, (s > 0 ? '+' : '') + s + ' bps');
+    HM_DAYS.forEach((d, j) => {
+      const r = grid[i][j], k = Math.abs(r.pct) / mx, fill = mixColor(r.pct >= 0 ? '--hm-pos' : '--hm-neg', k);
+      const x = L + j * colW, yy = T + i * rowH;
+      const current = d === S.x && Math.abs((m.y - m.ytm) * 1e4 - s) < 0.5;
+      const g = el('rect', { x: x + 1, y: yy + 1, width: colW - 2, height: rowH - 2, rx: 3, fill, stroke: current ? 'var(--ink)' : 'none', 'stroke-width': 2, style: 'cursor:pointer' }, svg);
+      el('text', { x: x + colW / 2, y: yy + rowH / 2 + 4, 'text-anchor': 'middle', style: 'pointer-events:none', fill: k > 0.55 ? '#fff' : 'var(--ink)', class: 'lbl' }, svg, fmt(r.pct * 100, 1));
+      g.addEventListener('pointermove', (ev) => showTip(ev, `${m.t} · t+${d} · ${s > 0 ? '+' : ''}${s} bps`, [['Retorno', pct(r.pct)], ['Anualizado', pct(r.ann)], ['Precio salida', fmt(r.exitPrice)], ['Paridad salida', pctP(r.parityExit)], ['USD / 100 VN', sgn(r.tr)]]));
+      g.addEventListener('pointerleave', hideTip);
+      g.addEventListener('click', () => { S.x = d; S.exitOv[m.t] = m.ytm + s / 1e4; const iy = cells[m.t].iy; iy.value = (S.exitOv[m.t] * 100).toFixed(2); syncInputs(); update(); });
+    });
+  });
+  // fix text colour on filled cells for the "white on strong fill" case
+  svg.querySelectorAll('text[fill]').forEach((t) => { t.style.fill = t.getAttribute('fill'); });
+}
+
+/* ---------- cash-flow detail ---------- */
+const PH = { seller: 'Vendedor (≤ entrada)', collected: 'Cobrado y reinvertido', exit: 'En precio de salida' };
+function renderDetail(M) {
+  const box = $('detail');
+  const m = S.detail && M.find((x) => x.t === S.detail);
+  box.hidden = !m;
+  if (!m) return;
+  const e = m.e, x = m.x, bp = bParamsFor(m.t), yAd = S.yAd / 100, rf = S.rf / 100, held = x - e;
+  const sc = m.sc, d = C.detail(m.b, e, x, m.y, rf, yAd, bp), ip = C.impliedProb(m.b, e, m.price, yAd, bp);
+  $('dTitle').textContent = 'Detalle de cálculo · ' + m.t;
+  $('dSub').textContent = `Entrada ${S.entry} a ${fmt(m.price)} · salida ${exitISO()} (t+${held}) · todo en USD cada 100 VN original`;
+  const kv = (title, pairs, cls = '') => `<div class="kv ${cls}"><h3>${title}</h3>${pairs.map(([k, v]) => `<div><span>${k}</span><span>${v}</span></div>`).join('')}</div>`;
+  const ex = S.exitOv[m.t] != null;
+  const bAss = S.bMode === 'shift' ? [['Valuación de B', 'shift de yields'], ['Shift sobre yield A', fmt(bp.shift, 0) + ' bps' + (S.shiftB[m.t] != null ? ' (por bono)' : '')], ['Yield de salida B', pct(d.rate.B.x)]]
+    : S.bMode === 'parity' ? [['Valuación de B', 'paridad'], ['Paridad B', fmt(S.bPar, 1) + '%'], ['Valor técnico a la exit date', fmt(d.vtExit, 4)], ['Precio B = paridad × VT', fmt(d.tot.B.exitPrice, 4)]]
+    : [['Valuación de B', 'reestructuración'], ['Fecha de reestructuración', S.rDate], ['Haircut sobre flujos posteriores', fmt(bp.h * 100, 1) + '%' + (S.hcB[m.t] != null ? ' (preset ' + PRESET_NAME[S.preset] + ')' : '')], ['Yield de salida B', pct(d.rate.B.x)]];
+  const fundCost = S.fundOn ? m.price * (Math.pow(1 + m.fr, held / 365) - 1) : 0;
+  $('dKv').innerHTML =
+    kv('Entrada', [['Fecha', S.entry], ['Precio sucio', fmt(m.price, 4)], ['TIR de entrada', pct(m.ytm)], ['Duration modificada', fmt(m.md)], ['Corridos', fmt(C.accruedAt(m.b, e), 4)], ['Capital residual', fmt(C.residualAt(m.b, e), 2)], ['Valor técnico', fmt(d.vtEntry, 4)], ['Paridad', pctP(C.parityAt(m.b, e, m.price))]]) +
+    kv('Salida · escenario A', [['Fecha', exitISO() + ` (t+${held})`], ['Exit yield A', pct(m.y) + (ex ? ' (propio)' : ` (TIR ent. ${sgn((m.y - m.ytm) * 1e4, 0)} bps${S.shiftA[m.t] != null ? ', por bono' : ''})`)], ['Precio A', fmt(sc.A.exitPrice, 4)], ['Corridos', fmt(C.accruedAt(m.b, x), 4)], ['Capital residual', fmt(C.residualAt(m.b, x), 2)], ['Valor técnico', fmt(d.vtExit, 4)], ['Paridad A', pctP(sc.A.parityExit)]], 'kA') +
+    kv('Probabilidad y escenario B', [['Prob. de B', fmt(S.pB, 0) + '%'], ...bAss, ['Precio B / yield B / paridad B', `${fmt(sc.B.exitPrice, 3)} / ${pct(sc.B.yExit)} / ${pctP(sc.B.parityExit)}`], ['Precio esperado', fmt(sc.E.exitPrice, 4)]], 'kB') +
+    kv('Retorno y riesgo', (() => {
+      const udv = sc.B.pct < 0 ? sc.A.pct / -sc.B.pct : NaN;
+      return [['Retorno A', pct(sc.A.pct)], ['Retorno B', pct(sc.B.pct)], ['Retorno esperado', pct(sc.E.pct)], ['Up / Down = Ret. A / −Ret. B', Number.isFinite(udv) ? fmt(udv, 2) + 'x' : 'sin downside']];
+    })()) +
+    kv('Reinversión y fondeo', [['Tasa libre de riesgo (reinversión)', fmt(S.rf, 2) + '% TEA'], ['Fondeo', S.fundOn ? fmt(m.fr * 100, 2) + '% TEA' : 'no incluido'], ['Costo de fondeo', fmt(fundCost, 4)], ['Base', 'TEA act/365']]) +
+    kv('Probabilidad implícita', [['Yield de descuento A', fmt(S.yAd, 2) + '%'], ['VPN A a la entrada', ip ? fmt(ip.npvA, 4) : '—'], ['VPN B a la entrada', ip ? fmt(ip.npvB, 4) : '—'], ['Precio de entrada', fmt(m.price, 4)], ['p = (VPN A − P) / (VPN A − VPN B)', ip && Number.isFinite(ip.pB) ? pct(ip.pB, 1) : '—']]);
+  // composition table
+  const A = sc.A, B = sc.B, E = sc.E, row = (l, f, c) => `<tr><td>${l}</td>${[A, B, E].map((r) => `<td class="${c ? c(f(r)) : ''}">${f(r)[0]}</td>`).join('')}</tr>`;
+  const num = (v, dd = 4, sg) => [sg ? sgn(v, dd) : fmt(v, dd), v];
+  $('dComp').innerHTML = `<thead><tr><th>Componente</th><th>A · performing (exit ${pct(m.y)})</th><th>B · ${B_NAME[S.bMode]}</th><th>Esperado (p = ${fmt(S.pB, 0)}%)</th></tr></thead><tbody>` +
+    row('− Precio de entrada', (r) => num(-r.entryPrice, 4, 1), (v) => signCls(v[1])) +
+    row('+ Cupones cobrados', (r) => num(r.coupons)) + row('+ Amortizaciones cobradas', (r) => num(r.amorts)) +
+    row('+ Ingreso por reinversión', (r) => num(r.reinvestIncome)) + row('+ Precio de salida', (r) => num(r.exitPrice)) +
+    row('− Costo de fondeo', (r) => num(-r.funding, 4, 1), (v) => signCls(v[1])) +
+    `</tbody><tfoot>` + row('= Retorno total USD', (r) => num(r.tr, 4, 1), (v) => signCls(v[1])) + row('Retorno %', (r) => [pct(r.pct), r.pct], (v) => signCls(v[1])) +
+    row('Anualizado', (r) => [pct(r.ann, 1), r.ann], (v) => signCls(v[1])) + `</tfoot>` +
+    `<tbody>` + row('Yield de salida (implícito)', (r) => [pct(r.yExit), r.yExit]) + row('Paridad de salida', (r) => [pctP(r.parityExit), r.parityExit]) + `</tbody>`;
+  // flows table
+  const n4 = (v) => (v == null ? '' : fmt(v, 4)), n5 = (v) => (v == null ? '' : fmt(v, 5));
+  const dash = (v, f) => (v == null ? '' : f(v));
+  const rt = (S_) => (d.rate[S_].x === null ? 'precio = paridad × VT' : `exit al ${pct(d.rate[S_].x)}`);
+  const re = (S_) => (d.rate[S_].e === null ? 'precio = paridad × VT' : `al ${pct(d.rate[S_].e)}`);
+  $('dHint').textContent = `Fase: un flujo programado hasta la entrada es del vendedor; entre entrada y salida (inclusive) se cobra y se reinvierte a ${fmt(S.rf, 2)}% desde su fecha de pago hasta la exit date (VF = monto × (1 + tasa)^(días/365)); después de la salida forma parte del precio de salida (VP = monto × (1 + yield)^(−días desde la exit date hasta el pago / 365)). Las fechas de pago están corridas al siguiente día hábil argentino. VPN a la entrada: todos los flujos posteriores a la entrada, descontados a la tasa de la prob. implícita.`;
+  const rowsHtml = d.rows.map((r) => {
+    const cls = r.phase === 'seller' ? 'dim' : 'ph-' + r.phase;
+    const sc2 = (S_, rr) => `<td class="sep">${r.phase === 'seller' ? '' : n4(rr.amt)}</td><td>${dash(rr.days, (v) => fmt(v, 0))}</td><td>${dash(rr.fac, n5)}</td><td>${dash(rr.fv, n4)}</td><td>${dash(rr.df, (v) => fmt(v, 6))}</td><td>${dash(rr.pv, n4)}</td>`;
+    return `<tr class="${cls}"><td>${C.isoOf(r.t)}</td><td>${C.isoOf(r.p)}</td><td>${n4(r.c)}</td><td>${n4(r.a)}</td><td>${n4(r.tot)}</td><td class="ph"><span class="badge ${r.phase}">${PH[r.phase]}</span></td>${sc2('A', r.A)}${sc2('B', r.B)}` +
+      `<td class="sep">${dash(r.A.dfe, (v) => fmt(v, 6))}</td><td>${dash(r.A.npv, n4)}</td><td>${dash(r.B.dfe, (v) => fmt(v, 6))}</td><td>${dash(r.B.npv, n4)}</td></tr>`;
+  }).join('');
+  const T = d.tot;
+  $('dFlows').innerHTML = `<thead><tr class="gh"><th colspan="6">Flujos del bono (por 100 VN original)</th><th colspan="6" class="gA">A · performing · ${rt('A')}</th><th colspan="6" class="gB">B · ${B_NAME[S.bMode]} · ${rt('B')}</th><th colspan="4">VPN a la entrada · A ${re('A')} · B ${re('B')}</th></tr>` +
+    `<tr><th>Fecha prog.</th><th>Fecha pago</th><th>Cupón</th><th>Amort.</th><th>Total</th><th class="ph">Fase</th>` +
+    `<th class="sep">Monto</th><th>Días reinv.</th><th>Factor reinv.</th><th>VF a exit</th><th>DF salida</th><th>VP salida</th>` +
+    `<th class="sep">Monto</th><th>Días reinv.</th><th>Factor reinv.</th><th>VF a exit</th><th>DF salida</th><th>VP salida</th>` +
+    `<th class="sep">DF A</th><th>VPN A</th><th>DF B</th><th>VPN B</th></tr></thead><tbody>${rowsHtml}</tbody>` +
+    `<tfoot><tr><td colspan="6" style="text-align:left">Totales · cobrado (monto, VF) · precio de salida (VP) · VPN a la entrada</td>` +
+    `<td class="sep">${n4(T.A.collected)}</td><td></td><td></td><td>${n4(T.A.fv)}</td><td></td><td>${n4(T.A.exitPrice)}</td>` +
+    `<td class="sep">${n4(T.B.collected)}</td><td></td><td></td><td>${n4(T.B.fv)}</td><td></td><td>${n4(T.B.exitPrice)}</td>` +
+    `<td class="sep"></td><td>${n4(T.A.npvEntry)}</td><td></td><td>${n4(T.B.npvEntry)}</td></tr></tfoot>`;
+}
+$('dClose').addEventListener('click', () => { S.detail = null; $('detail').hidden = true; });
+
+/* ---------- implied probability ---------- */
+function renderImplied(M) {
+  const tb = document.querySelector('#itbl tbody'); tb.textContent = '';
+  const yA = S.yAd / 100;
+  const bdesc = S.bMode === 'shift' ? `B: yield A + shift (${fmt(S.bShift, 0)} bps por defecto, editable por bono)` : S.bMode === 'parity' ? `B: paridad ${fmt(S.bPar, 1)}% × valor técnico` : (S.preset !== 'manual' ? `B: preset ${PRESET_NAME[S.preset]} por bono desde ${S.rDate}` : `B: haircut ${fmt(S.hc, 0)}% desde ${S.rDate}, al ${fmt(S.yB, 1)}%`);
+  $('isum').textContent = `A: flujos originales al ${fmt(S.yAd, 1)}% · ${bdesc} · valuados al ${S.entry}`;
+  M.forEach((m) => {
+    const bp = bParamsFor(m.t), ip = C.impliedProb(m.b, m.e, m.price, yA, bp);
+    const tr = document.createElement('tr'); if (m.t === S.sel) tr.classList.add('sel');
+    const add = (txt, cls, title) => { const td = document.createElement('td'); td.textContent = txt; if (cls) td.className = cls; if (title) td.title = title; tr.appendChild(td); return td; };
+    add(m.t).className = 'tk';
+    add(fmt(m.price));
+    if (!ip) { add('—'); add('—'); add('—'); }
+    else {
+      const p = ip.pB, ok = Number.isFinite(p), out = ok && (p < 0 || p > 1);
+      const why = out ? (p < 0 ? 'El precio está por encima del VPN de A: ningún mix de A y B lo explica con estas tasas.' : 'El precio está por debajo del VPN de B: ningún mix de A y B lo explica con estas tasas.') : '';
+      add(fmt(ip.npvA)); add(fmt(ip.npvB));
+      const td = document.createElement('td'), wrap = document.createElement('div'), lab = document.createElement('div'), bar = document.createElement('div');
+      wrap.className = 'pbwrap'; lab.className = 'plab'; bar.className = 'pbar'; if (why) td.title = why;
+      if (ok) {
+        const pc = Math.min(1, Math.max(0, p)), a = document.createElement('span'), b = document.createElement('span'), la = document.createElement('span'), lb = document.createElement('span');
+        a.style.cssText = `width:${((1 - pc) * 100).toFixed(1)}%;background:var(--c3)`; b.style.cssText = `width:${(pc * 100).toFixed(1)}%;background:var(--c2)`;
+        la.style.width = a.style.width; lb.style.width = b.style.width;
+        la.textContent = pct(1 - p, 1); lb.textContent = pct(p, 1); if (out) { la.className = 'neg'; lb.className = 'neg'; }
+        if (pc < 1) { bar.appendChild(a); lab.appendChild(la); } else lab.appendChild(Object.assign(document.createElement('span'), { textContent: pct(1 - p, 1), className: out ? 'neg' : '' }));
+        if (pc > 0) { bar.appendChild(b); lab.appendChild(lb); }
+      } else lab.textContent = '—';
+      wrap.appendChild(lab); wrap.appendChild(bar); td.appendChild(wrap); tr.appendChild(td);
+    }
+    tr.addEventListener('click', () => { S.sel = m.t; update(); });
+    tb.appendChild(tr);
+  });
+  const m = M.find((x) => x.t === S.sel), ip = m && C.impliedProb(m.b, m.e, m.price, yA, bParamsFor(m.t)), ok = ip && Number.isFinite(ip.pB);
+  $('applyImp').textContent = ok ? `Aplicar prob. B de ${S.sel} (${fmt(Math.min(1, Math.max(0, ip.pB)) * 100, 0)}%) al deslizador` : 'Aplicar prob. B implícita al deslizador';
+  $('applyImp').disabled = !ok;
+}
+
+/* ---------- update ---------- */
+let M = [];
+// don't reorder rows while a table input has focus (it would drop the caret)
+const tableBusy = () => document.querySelector('#tbl').contains(document.activeElement) && document.activeElement.tagName === 'INPUT';
+document.querySelector('#tbl').addEventListener('focusout', () => setTimeout(() => { if (!tableBusy()) update(); }, 0));
+function update() {
+  M = model();
+  if (!tableBusy()) arrange(M);
+  M.forEach((m) => {
+    const c = cells[m.t], r = m.r;
+    rows[m.t].classList.toggle('sel', m.t === S.sel);
+    c.ytm.textContent = Number.isFinite(m.ytm) ? fmt(m.ytm * 100) + '%' : 'venc.';
+    c.md.textContent = Number.isFinite(m.md) ? fmt(m.md) : '—';
+    c.iy.placeholder = Number.isFinite(m.y) ? fmt(m.y * 100) : '';
+    c.isA.placeholder = Number.isFinite(m.y) && Number.isFinite(m.ytm) ? fmt((m.y - m.ytm) * 1e4, 0) : '';
+    c.isB.disabled = S.bMode !== 'shift'; c.isB.placeholder = S.bMode === 'shift' ? fmt(S.bShift, 0) : '—';
+    c.pe.textContent = r ? pctP(r.parityEntry) : '—'; c.px2.textContent = r ? pctP(r.parityExit) : '—';
+    const be = m.be, bey = be && Number.isFinite(be.y);
+    c.bey.textContent = bey ? fmt(be.y * 100) + '%' : '—';
+    const dbps = bey ? (be.y - m.ytm) * 1e4 : NaN;
+    c.bed.textContent = bey ? sgn(dbps, 0) : '—'; c.bed.className = bey ? signCls(dbps) : ''; tint(c.bed, dbps, 500);
+    c.bep.textContent = bey ? fmt(be.price) : '—'; c.bepar.textContent = bey ? pctP(be.parity) : '—';
+    const ys = (v) => Number.isFinite(v) ? fmt(v * 100) + '%' : '—';
+    c.pA.textContent = m.sc ? fmt(m.sc.A.exitPrice) : '—'; c.pB.textContent = m.sc ? fmt(m.sc.B.exitPrice) : '—';
+    c.paA.textContent = m.sc ? pctP(m.sc.A.parityExit) : '—'; c.paB.textContent = m.sc ? pctP(m.sc.B.parityExit) : '—';
+    c.yB.textContent = m.sc ? ys(m.sc.B.yExit) : '—'; c.yE.textContent = m.sc ? ys(m.sc.E.yExit) : '—';
+    c.rA.textContent = m.sc ? pct(m.sc.A.pct) : '—'; c.rA.className = m.sc ? signCls(m.sc.A.pct) : ''; tint(c.rA, m.sc ? m.sc.A.pct : NaN, 0.15);
+    c.rB.textContent = m.sc ? pct(m.sc.B.pct) : '—'; c.rB.className = m.sc ? signCls(m.sc.B.pct) : ''; tint(c.rB, m.sc ? m.sc.B.pct : NaN, 0.15);
+    const ud = m.sc && m.sc.B.pct < 0 ? m.sc.A.pct / -m.sc.B.pct : NaN;
+    c.ud.textContent = Number.isFinite(ud) ? fmt(ud, 2) + 'x' : (m.sc ? 'sin downside' : '—'); c.ud.className = Number.isFinite(ud) ? (ud >= 1 ? 'posv' : 'neg') : ''; tint(c.ud, Number.isFinite(ud) ? Math.log(ud) : NaN, 1);
+    c.bpp.textContent = Number.isFinite(m.pbe) ? fmt(m.pbe * 100, 0) + '%' : '—';
+    if (!r) { ['exp', 'flows', 'reinv', 'fund', 'tr', 'pct', 'ann'].forEach((k) => { c[k].textContent = '—'; c[k].className = ''; c[k].style.background = ''; }); return; }
+    setNum(c.exp, r.exitPrice); setNum(c.flows, r.coupons + r.amorts); setNum(c.reinv, r.reinvestIncome, 3);
+    setNum(c.fund, -r.funding, 2, signCls(-r.funding));
+    setNum(c.tr, r.tr, 2, signCls(r.tr)); c.tr.textContent = sgn(r.tr);
+    c.pct.textContent = pct(r.pct); c.pct.className = signCls(r.pct);
+    c.ann.textContent = pct(r.ann, 1); c.ann.className = signCls(r.ann);
+    tint(c.tr, r.tr, 0.15 * m.price); tint(c.pct, r.pct, 0.15); tint(c.ann, r.ann, 0.5);
+  });
+  $('barsub').textContent = `Entrada ${S.entry} → salida ${exitISO()} (${S.x} días), prob. de B ${S.pB}%` + (S.fundOn ? ', neto de fondeo' : ', sin fondeo');
+  const sel = M.find((m) => m.t === S.sel);
+  drawBars(M); drawWaterfall(sel); drawHeat(sel); renderImplied(M); renderDetail(M);
+}
+buildRows(); syncInputs(); update();
+new ResizeObserver(() => { const sel = M.find((m) => m.t === S.sel); if (sel) { drawBars(M); drawWaterfall(sel); drawHeat(sel); } }).observe(document.querySelector('main'));
+</script>
+</body>
+</html>
